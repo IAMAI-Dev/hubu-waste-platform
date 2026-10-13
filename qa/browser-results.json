@@ -1,0 +1,167 @@
+{
+  "results": [
+    {
+      "name": "index layout 1920x1080",
+      "passed": true,
+      "width": 1920,
+      "scroll": 1920
+    },
+    {
+      "name": "detail layout 1920x1080",
+      "passed": true,
+      "width": 1920,
+      "scroll": 1920
+    },
+    {
+      "name": "feedback layout 1920x1080",
+      "passed": true,
+      "width": 1920,
+      "scroll": 1920
+    },
+    {
+      "name": "index layout 1366x768",
+      "passed": true,
+      "width": 1366,
+      "scroll": 1366
+    },
+    {
+      "name": "detail layout 1366x768",
+      "passed": true,
+      "width": 1366,
+      "scroll": 1366
+    },
+    {
+      "name": "feedback layout 1366x768",
+      "passed": true,
+      "width": 1366,
+      "scroll": 1366
+    },
+    {
+      "name": "index layout 1024x768",
+      "passed": true,
+      "width": 1024,
+      "scroll": 1024
+    },
+    {
+      "name": "detail layout 1024x768",
+      "passed": true,
+      "width": 1024,
+      "scroll": 1024
+    },
+    {
+      "name": "feedback layout 1024x768",
+      "passed": true,
+      "width": 1024,
+      "scroll": 1024
+    },
+    {
+      "name": "index layout 768x1024",
+      "passed": true,
+      "width": 768,
+      "scroll": 768
+    },
+    {
+      "name": "detail layout 768x1024",
+      "passed": true,
+      "width": 768,
+      "scroll": 768
+    },
+    {
+      "name": "feedback layout 768x1024",
+      "passed": true,
+      "width": 768,
+      "scroll": 768
+    },
+    {
+      "name": "index layout 390x844",
+      "passed": true,
+      "width": 390,
+      "scroll": 390
+    },
+    {
+      "name": "detail layout 390x844",
+      "passed": true,
+      "width": 390,
+      "scroll": 390
+    },
+    {
+      "name": "feedback layout 390x844",
+      "passed": true,
+      "width": 390,
+      "scroll": 390
+    },
+    {
+      "name": "index layout 360x800",
+      "passed": true,
+      "width": 360,
+      "scroll": 360
+    },
+    {
+      "name": "detail layout 360x800",
+      "passed": true,
+      "width": 360,
+      "scroll": 360
+    },
+    {
+      "name": "feedback layout 360x800",
+      "passed": true,
+      "width": 360,
+      "scroll": 360
+    },
+    {
+      "name": "index layout 844x390",
+      "passed": true,
+      "width": 844,
+      "scroll": 844
+    },
+    {
+      "name": "detail layout 844x390",
+      "passed": true,
+      "width": 844,
+      "scroll": 844
+    },
+    {
+      "name": "feedback layout 844x390",
+      "passed": true,
+      "width": 844,
+      "scroll": 844
+    },
+    {
+      "name": "12 screenshots: 3 pages × 2 themes × desktop/mobile",
+      "passed": true
+    },
+    {
+      "name": "mobile points, vehicles, details, follow and drag exit",
+      "passed": true
+    },
+    {
+      "name": "mobile timeline, speed, charts and record-to-map selection",
+      "passed": true
+    },
+    {
+      "name": "four-act tour arrival, skipping, rewind, restart and restoration",
+      "passed": true
+    },
+    {
+      "name": "feedback submit, linked order, reload and cross-page progress",
+      "passed": true
+    },
+    {
+      "name": "clear confirmation preserves system examples",
+      "passed": true
+    },
+    {
+      "name": "storage failure shows error without false success",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion and keyboard map/timeline interaction",
+      "passed": true
+    },
+    {
+      "name": "no uncaught browser JavaScript errors",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

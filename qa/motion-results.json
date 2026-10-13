@@ -1,0 +1,30 @@
+[
+  {
+    "name": "automatic story reaches actual arrival and restores free playback",
+    "passed": true
+  },
+  {
+    "name": "3 second active map animation sampling",
+    "passed": true,
+    "frames": 433,
+    "medianMs": 7,
+    "p95Ms": 7.299999999999272,
+    "over50ms": 0
+  },
+  {
+    "name": "background visibility event freezes time without catch-up",
+    "passed": true
+  },
+  {
+    "name": "navigation retains playing flag and freezes time on feedback page",
+    "passed": true
+  },
+  {
+    "name": "20:00 stops and replay restarts from 06:00",
+    "passed": true
+  },
+  {
+    "name": "offline schematic retains point selection and replay",
+    "passed": true
+  }
+]

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#193C34" />
+    <title>清运看板 · 琴园智清</title>
+    <script>
+      try {
+        if (localStorage.getItem('qy-theme') === 'dark')
+          document.documentElement.dataset.theme = 'dark';
+      } catch (e) {}
+    </script>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="dashboard-page">
+    <a class="skip-link" href="#main">跳到主要内容</a>
+    <header id="site-header" class="site-header"></header>
+    <main id="main" class="dashboard-main">
+      <div class="dashboard-heading">
+        <div>
+          <span class="eyebrow">校园运行 / 模拟日</span>
+          <h1>
+            清运看板<span class="small-live"><i></i>轨迹与记录同步</span>
+          </h1>
+        </div>
+        <button id="start-tour" class="button secondary">
+          <span data-icon="play"></span>清运故事
+        </button>
+      </div>
+      <section class="metrics" aria-label="清运指标">
+        <div>
+          <span>今日清运量</span>
+          <p><b id="metric-kg">0</b><small>kg</small></p>
+          <span class="metric-icon" data-icon="bin"></span>
+        </div>
+        <div>
+          <span>收运次数</span>
+          <p><b id="metric-trips">0</b><small>次</small></p>
+          <span class="metric-icon" data-icon="truck"></span>
+        </div>
+        <div>
+          <span>满溢点位</span>
+          <p><b id="metric-alerts">0</b><small>处</small></p>
+          <span class="metric-icon" data-icon="alert"></span>
+        </div>
+        <div>
+          <span>待处置工单</span>
+          <p><b id="metric-orders">0</b><small>条</small></p>
+          <span class="metric-icon" data-icon="message"></span>
+        </div>
+      </section>
+      <nav class="workspace-tabs" aria-label="看板视图">
+        <button data-view="map" aria-pressed="true"><span data-icon="map"></span>地图</button
+        ><button data-view="trucks" aria-pressed="false"><span data-icon="truck"></span>车辆</button
+        ><button data-view="points" aria-pressed="false"><span data-icon="pin"></span>点位</button
+        ><button data-view="charts" aria-pressed="false"><span data-icon="chart"></span>图表</button
+        ><button data-view="records" aria-pressed="false">
+          <span data-icon="list"></span>记录
+        </button>
+      </nav>
+      <div class="workspace" data-view="map">
+        <aside class="object-panel panel" aria-label="车辆与投放点">
+          <div class="panel-title">
+            <h2>校园对象</h2>
+            <span>3 辆车 · 6 处点位</span>
+          </div>
+          <div class="segmented" id="object-tabs">
+            <button data-kind="trucks" aria-pressed="false">清运车辆</button
+            ><button data-kind="points" aria-pressed="true">投放点</button>
+          </div>
+          <label class="search-field"
+            ><span data-icon="search"></span
+            ><input
+              id="object-search"
+              type="search"
+              placeholder="搜索名称或车牌"
+              aria-label="搜索车辆或点位" /></label
+          ><label class="filter-field"
+            ><span>状态</span
+            ><select id="object-status" aria-label="筛选对象状态">
+              <option value="all">全部状态</option>
+              <option value="full">已满溢</option>
+              <option value="near">接近满</option>
+              <option value="ok">正常</option>
+            </select></label
+          >
+          <div id="object-list" class="object-list"></div>
+          <div class="panel-foot">选择对象，查看位置与处理进展</div>
+        </aside>
+        <section class="map-panel panel" aria-label="校园地图">
+          <div class="map-topline">
+            <span><i class="live-dot"></i>湖北大学 · 武昌校区</span
+            ><button id="follow-button" class="button small secondary">
+              <span data-icon="target"></span><span>跟随车辆</span>
+            </button>
+          </div>
+          <div id="dashboard-map" class="dashboard-map"></div>
+        </section>
+        <aside class="insight-panel panel" aria-label="统计与详情">
+          <div id="insight-summary">
+            <div class="panel-title">
+              <h2>清运观察</h2>
+              <span>当前模拟日</span>
+            </div>
+            <section class="chart-section">
+              <div class="chart-heading">
+                <h3>累计清运量</h3>
+                <small>kg</small>
+              </div>
+              <div
+                id="trend-chart"
+                class="chart"
+                role="img"
+                aria-label="按小时累计清运量趋势"
+              ></div>
+            </section>
+            <section class="chart-section">
+              <div class="chart-heading">
+                <h3>点位清运排行</h3>
+                <small>累计 kg</small>
+              </div>
+              <div
+                id="rank-chart"
+                class="chart rank-chart"
+                role="img"
+                aria-label="各点位累计清运量排行"
+              ></div>
+            </section>
+            <div class="co2-note">
+              <span data-icon="leaf"></span>
+              <div>
+                <b><span id="co2-value">0</span> kg CO₂e</b>
+                <p>碳减排估算 · 模拟清运量 × 0.30</p>
+              </div>
+            </div>
+            <div class="recent-heading">
+              <h3>最近收运</h3>
+              <button id="all-records" class="text-button">全部记录</button>
+            </div>
+            <div id="recent-events"></div>
+          </div>
+          <div id="object-detail" hidden></div>
+        </aside>
+        <section id="records-panel" class="records-panel panel" hidden>
+          <div class="panel-title">
+            <h2>清运记录</h2>
+            <button id="close-records" class="icon-btn" aria-label="关闭清运记录">
+              <span data-icon="close"></span>
+            </button>
+          </div>
+          <p class="panel-description">每一次收运对应一个点位作业，所有记录随回放时刻更新。</p>
+          <div class="record-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>模拟时间</th>
+                  <th>投放点</th>
+                  <th>车辆</th>
+                  <th>收运量</th>
+                  <th><span class="sr-only">操作</span></th>
+                </tr>
+              </thead>
+              <tbody id="record-rows"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+      <section class="playback panel" aria-label="模拟时间控制">
+        <div class="playback-main">
+          <button id="play-button" class="round-button" aria-label="暂停播放">
+            <span data-icon="pause"></span>
+          </button>
+          <div class="playback-time"><b id="play-time">09:45</b><span>模拟时刻</span></div>
+          <button
+            id="timeline-toggle"
+            class="icon-btn mobile-only"
+            aria-label="展开时间轴"
+            aria-expanded="false"
+          >
+            <span data-icon="chevronUp"></span>
+          </button>
+        </div>
+        <div class="timeline-control">
+          <div class="timeline-caption"><span>全天回放</span><span>06:00 — 20:00</span></div>
+          <input
+            id="time-slider"
+            type="range"
+            min="360"
+            max="1200"
+            step="1"
+            value="585"
+            aria-label="选择模拟时刻"
+          />
+          <div class="time-ticks">
+            <span>06:00</span><span>09:00</span><span>12:00</span><span>15:00</span
+            ><span>18:00</span><span>20:00</span>
+          </div>
+        </div>
+        <div class="speed-control">
+          <div class="segmented" id="speed-buttons">
+            <button data-speed="1" aria-pressed="true">1×</button
+            ><button data-speed="4" aria-pressed="false">4×</button
+            ><button data-speed="16" aria-pressed="false">16×</button>
+          </div>
+          <small>1× = 每秒 10 模拟分钟</small>
+        </div>
+      </section>
+      <div
+        id="tour-panel"
+        class="tour-panel"
+        hidden
+        role="region"
+        aria-label="桃李园清运故事"
+      ></div>
+    </main>
+    <script src="routes.js"></script>
+    <script src="seed-data.js"></script>
+    <script src="core.js"></script>
+    <script src="ui.js"></script>
+    <script src="libs/echarts.min.js"></script>
+    <script src="map-config.js"></script>
+    <script src="map.js"></script>
+    <script src="tour.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>

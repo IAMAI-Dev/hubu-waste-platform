@@ -1,0 +1,9 @@
+{
+  "syntaxPassed": true,
+  "productIconScanPassed": true,
+  "excluded": [
+    "historical feedback text",
+    "user-provided text",
+    "vendor libraries"
+  ]
+}

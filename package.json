@@ -1,0 +1,15 @@
+{
+  "name": "hubu-waste-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "琴园智清：湖北大学校园清运前端演示原型",
+  "scripts": {
+    "test": "node tests/core.test.cjs",
+    "test:browser": "node tests/browser.test.cjs && node tests/motion.test.cjs",
+    "format": "prettier --write core.js dashboard.js feedback.js home.js map.js seed-data.js tour.js ui.js style.css *.html tests/*.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.0",
+    "prettier": "3.9.10"
+  }
+}

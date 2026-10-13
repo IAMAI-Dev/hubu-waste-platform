@@ -1,0 +1,34 @@
+[
+  {
+    "name": "30/60/120 fps and 1/4/16 speed produce identical business snapshots",
+    "passed": true
+  },
+  {
+    "name": "rewind removes future records and replay never double counts",
+    "passed": true
+  },
+  {
+    "name": "feedback merges open overflow order, completes at real collection and survives reload",
+    "passed": true
+  },
+  {
+    "name": "generic issues use 18/55 minute demo progress; suggestions and praise create no orders",
+    "passed": true
+  },
+  {
+    "name": "tour isolation restores time speed selection follow and local data",
+    "passed": true
+  },
+  {
+    "name": "legacy feedback preserved without inferred orders; unrated excluded; failed storage never reports success",
+    "passed": true
+  },
+  {
+    "name": "fractional boundary never exposes the next minute event",
+    "passed": true
+  },
+  {
+    "name": "reload ignores an orphan work order from an interrupted two-key write",
+    "passed": true
+  }
+]

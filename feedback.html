@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#193C34" />
+    <title>反馈中心 · 琴园智清</title>
+    <script>
+      try {
+        if (localStorage.getItem('qy-theme') === 'dark')
+          document.documentElement.dataset.theme = 'dark';
+      } catch (e) {}
+    </script>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="feedback-page">
+    <a class="skip-link" href="#main">跳到主要内容</a>
+    <header id="site-header" class="site-header"></header>
+    <main id="main" class="feedback-main">
+      <div class="page-intro">
+        <div>
+          <span class="eyebrow">一起，让校园更整洁</span>
+          <h1>每一条反馈，<em>都有回响。</em></h1>
+          <p>记录身边的问题，也分享让校园变好的建议。</p>
+        </div>
+        <div class="local-note">
+          <span data-icon="info"></span><span>演示环境<br /><b>内容仅保存在本机浏览器</b></span>
+        </div>
+      </div>
+      <nav class="feedback-mobile-tabs segmented" aria-label="反馈页面视图">
+        <button data-feedback-view="form" aria-pressed="true">提交反馈</button
+        ><button data-feedback-view="list" aria-pressed="false">查看进展</button>
+      </nav>
+      <div class="feedback-layout" data-view="form">
+        <section class="feedback-form-panel panel">
+          <div class="panel-title">
+            <h2>写下你的反馈</h2>
+            <span data-icon="message"></span>
+          </div>
+          <form id="feedback-form">
+            <div class="field">
+              <label for="feedback-kind">反馈类别</label
+              ><select id="feedback-kind" name="type">
+                <option>问题反馈</option>
+                <option>建议</option>
+                <option>表扬</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="feedback-target">关联对象</label
+              ><select id="feedback-target" name="target"></select>
+            </div>
+            <div class="field" id="issue-field">
+              <label for="feedback-issue">问题类型</label
+              ><select id="feedback-issue" name="issueType">
+                <option value="full">垃圾满溢</option>
+                <option value="late">清运不及时</option>
+                <option value="dirty">周边脏乱</option>
+                <option value="broken">设备损坏</option>
+                <option value="wrong">分类不准</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label for="feedback-who">称呼 <small>选填</small></label
+                ><input id="feedback-who" name="who" maxlength="10" placeholder="如何称呼你" />
+              </div>
+              <div class="field">
+                <label for="feedback-role">你的身份</label
+                ><select id="feedback-role" name="role">
+                  <option>学生</option>
+                  <option>教职工</option>
+                  <option>后勤人员</option>
+                  <option>访客</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="feedback-text">具体描述 <span>必填</span></label
+              ><textarea
+                id="feedback-text"
+                name="text"
+                minlength="5"
+                maxlength="300"
+                rows="4"
+                required
+                placeholder="例如：桃李园食堂午饭后垃圾桶满了，希望及时安排清运。"
+              ></textarea>
+              <div class="field-helper">
+                <span>描述位置、情况与时间，方便了解问题。</span
+                ><span id="text-count">0 / 300</span>
+              </div>
+            </div>
+            <fieldset class="rating-field">
+              <legend>满意度评价 <small>选填</small></legend>
+              <div id="rating-options" class="rating-options"></div>
+              <span id="rating-description">未评分，不计入满意度统计</span>
+            </fieldset>
+            <p id="form-error" class="form-error" role="alert" hidden></p>
+            <button class="button primary submit-button" type="submit">
+              提交反馈 <span data-icon="send"></span>
+            </button>
+            <p class="form-note">点位问题将关联演示工单；建议与表扬单独收录。</p>
+            <div id="submit-result" class="submit-result" role="status" hidden></div>
+          </form>
+          <div class="form-bottom">
+            <span id="mine-count"></span
+            ><button id="clear-feedback" class="text-button">清除本机提交</button>
+          </div>
+        </section>
+        <section class="feedback-results" aria-label="反馈与处理进展">
+          <div class="feedback-stats panel" id="feedback-stats"></div>
+          <div class="feedback-list-panel panel">
+            <div class="panel-title">
+              <h2>反馈与处理进展</h2>
+              <span id="feedback-count"></span>
+            </div>
+            <div class="feedback-filters">
+              <label
+                ><span class="sr-only">筛选反馈类别</span
+                ><select id="filter-type">
+                  <option value="all">全部类别</option>
+                  <option>问题反馈</option>
+                  <option>建议</option>
+                  <option>表扬</option>
+                </select></label
+              ><label
+                ><span class="sr-only">筛选处理状态</span
+                ><select id="filter-status">
+                  <option value="all">全部状态</option>
+                  <option value="pending">待受理</option>
+                  <option value="doing">处理中</option>
+                  <option value="done">已办结 / 已收录</option>
+                </select></label
+              ><label class="checkbox-label"
+                ><input id="filter-mine" type="checkbox" />本机提交</label
+              >
+            </div>
+            <div class="feedback-context">
+              <span>处理进展对应模拟时刻 <b id="feedback-sim-time">09:45</b></span
+              ><a class="text-link" href="detail.html">调整回放 <span data-icon="arrow"></span></a>
+            </div>
+            <div id="feedback-list"></div>
+          </div>
+        </section>
+      </div>
+      <dialog id="clear-dialog">
+        <div class="dialog-content">
+          <span class="dialog-icon" data-icon="bin"></span>
+          <h2>清除本机提交？</h2>
+          <p>这会移除本机提交的反馈及其关联工单。系统示例仍会保留，清除后无法恢复。</p>
+          <div class="dialog-actions">
+            <button id="cancel-clear" class="button secondary">保留反馈</button
+            ><button id="confirm-clear" class="button danger">确认清除</button>
+          </div>
+        </div>
+      </dialog>
+    </main>
+    <footer class="site-footer">
+      <span>琴园智清 <span class="footer-dot">·</span> 湖北大学校园清运</span
+      ><span>预设路线与模拟数据，用于方案演示</span>
+    </footer>
+    <script src="routes.js"></script>
+    <script src="seed-data.js"></script>
+    <script src="core.js"></script>
+    <script src="ui.js"></script>
+    <script src="map-config.js"></script>
+    <script src="map.js"></script>
+    <script src="feedback.js"></script>
+  </body>
+</html>
