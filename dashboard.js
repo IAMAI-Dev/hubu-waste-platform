@@ -11,13 +11,65 @@
     lastChart = '',
     selection = null;
   U.init('dashboard');
-  var map = HUBU_MAP.create($('dashboard-map'), {
+  var M = HUBU_MOTION,
+    renderer,
+    lastEventTime = H.getSnapshot().time,
+    eventIsolation = false,
+    scrubTimer;
+  var mapOptions = {
     onSelect: function (kind, id) {
       select({ kind: kind, id: id });
     },
     onDrag: function () {
       H.setPlayback({ follow: null });
     },
+  };
+  function switchMap(mode) {
+    if (renderer) renderer.destroy();
+    renderer = (mode === 'geo' ? HUBU_MAP : HUBU_SCENE).create($('dashboard-map'), mapOptions);
+    renderer.select(selection, false);
+    document.querySelectorAll('[data-map-mode]').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.mapMode === mode));
+    });
+  }
+  var map = {
+    paint: function (t) {
+      renderer.paint(t);
+    },
+    select: function (s, m) {
+      renderer.select(s, m);
+    },
+    fit: function () {
+      renderer.fit();
+    },
+    follow: function (id) {
+      renderer.follow(id);
+    },
+  };
+  switchMap('campus');
+  document.querySelectorAll('[data-map-mode]').forEach(function (b) {
+    b.onclick = function () {
+      switchMap(b.dataset.mapMode);
+    };
+  });
+  $('toggle-panels').onclick = function () {
+    var hidden = document.querySelector('.dashboard-main').classList.toggle('scene-only');
+    this.setAttribute('aria-pressed', String(hidden));
+    this.setAttribute('aria-label', hidden ? '展开面板' : '收起面板');
+    this.querySelector('span:last-child').textContent = hidden ? '展开面板' : '收起面板';
+    document
+      .querySelectorAll('.metrics,.object-panel,.insight-panel,.workspace-tabs')
+      .forEach(function (el) {
+        el.inert = hidden;
+      });
+  };
+  $('object-list').addEventListener('pointerover', function (e) {
+    var b = e.target.closest('[data-object]');
+    if (renderer.preview)
+      renderer.preview(b && b.dataset.objectKind === 'truck' ? b.dataset.object : null);
+  });
+  $('object-list').addEventListener('pointerleave', function () {
+    if (renderer.preview) renderer.preview(null);
   });
   var trend = echarts.init($('trend-chart')),
     rank = echarts.init($('rank-chart'));
@@ -29,6 +81,16 @@
     $('records-panel').hidden = v !== 'records';
     if (v === 'points' || v === 'trucks') setKind(v);
     if (v === 'charts') {
+      $('insight-summary').hidden = false;
+      $('object-detail').hidden = true;
+      M.animate(
+        document.querySelector('.insight-panel'),
+        [
+          { opacity: 0.3, transform: 'translateY(20px)' },
+          { opacity: 1, transform: 'none' },
+        ],
+        { duration: 420 },
+      );
       requestAnimationFrame(function () {
         trend.resize();
         rank.resize();
@@ -44,6 +106,14 @@
     $('object-detail').hidden = !s;
     lastDetail = '';
     if (s) view('map');
+    M.animate(
+      $('object-detail'),
+      [
+        { opacity: 0, transform: 'translateX(22px)' },
+        { opacity: 1, transform: 'none' },
+      ],
+      { duration: 380 },
+    );
     render(H.getSnapshot());
     H.saveTime();
   }
@@ -297,6 +367,19 @@
     if (e.data.pid) select({ kind: 'point', id: e.data.pid });
   });
   function render(s) {
+    if (
+      s.time > lastEventTime &&
+      s.time - lastEventTime < 60 &&
+      (s.playback.playing || s.isolated) &&
+      eventIsolation === s.isolated
+    ) {
+      var fresh = s.events.filter(function (e) {
+        return e.at > lastEventTime && e.at <= s.time;
+      });
+      if (fresh.length && renderer.event) renderer.event(fresh[0]);
+    }
+    lastEventTime = s.time;
+    eventIsolation = s.isolated;
     U.number($('metric-kg'), s.totalKg);
     U.number($('metric-trips'), s.totalTrips);
     U.number($('metric-alerts'), s.alerts);
@@ -384,8 +467,17 @@
     render(H.getSnapshot());
   };
   $('time-slider').oninput = function () {
+    M.cancelFlights();
+    if (renderer.ghost) renderer.ghost();
     H.setPlayback({ playing: false });
     H.stepTo(+this.value);
+    lastEventTime = +this.value;
+    var stage = $('dashboard-map');
+    stage.classList.add('is-scrubbing');
+    clearTimeout(scrubTimer);
+    scrubTimer = setTimeout(function () {
+      stage.classList.remove('is-scrubbing');
+    }, 450);
     render(H.getSnapshot());
   };
   $('time-slider').onchange = function () {

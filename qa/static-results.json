@@ -1,6 +1,7 @@
 {
   "syntaxPassed": true,
   "productIconScanPassed": true,
+  "hits": [],
   "excluded": [
     "historical feedback text",
     "user-provided text",

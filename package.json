@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node tests/core.test.cjs",
     "test:browser": "node tests/browser.test.cjs && node tests/motion.test.cjs",
-    "format": "prettier --write core.js dashboard.js feedback.js home.js map.js seed-data.js tour.js ui.js style.css *.html tests/*.cjs"
+    "format": "prettier --write *.js *.css *.html tests/*.cjs",
+    "test:cinematic": "node tests/cinematic.test.cjs"
   },
   "devDependencies": {
     "playwright": "1.64.0",

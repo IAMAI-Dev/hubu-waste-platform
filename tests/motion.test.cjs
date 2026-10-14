@@ -97,6 +97,7 @@ function pass(name, data) {
     assert(await p.evaluate(() => HUBU.getNow() < 370));
     pass('20:00 stops and replay restarts from 06:00');
     await p.evaluate(() => HUBU.setPlayback({ playing: false }));
+    await p.locator('[data-map-mode=geo]').click();
     await p.locator('.keep-schematic').click();
     assert((await p.locator('.map-note').innerText()).includes('本地校园示意图'));
     await c.setOffline(true);

@@ -88,9 +88,9 @@ function pass(name, data = {}) {
     assert.equal(await page.evaluate(() => HUBU.getSnapshot().playback.follow), 'T2');
     await page.getByRole('button', { name: '收起详情' }).click();
     const map = await page.locator('.campus-svg').boundingBox();
-    await page.mouse.move(map.x + 25, map.y + 75);
+    await page.mouse.move(map.x + 25, map.y + 350);
     await page.mouse.down();
-    await page.mouse.move(map.x + 75, map.y + 105, { steps: 5 });
+    await page.mouse.move(map.x + 75, map.y + 380, { steps: 5 });
     await page.mouse.up();
     assert.equal(await page.evaluate(() => HUBU.getSnapshot().playback.follow), null);
     pass('mobile points, vehicles, details, follow and drag exit');
@@ -137,8 +137,7 @@ function pass(name, data = {}) {
     await page.locator('#feedback-text').fill('测试反馈：桃李园食堂周围垃圾需要清理。');
     await page.locator('#feedback-issue').selectOption('dirty');
     await page.locator('button[type=submit]').click();
-    assert(await page.locator('#submit-result').isVisible());
-    await page.getByRole('button', { name: '查看进度', exact: true }).click();
+    assert(await page.locator('.feedback-card.mine').isVisible());
     assert(await page.locator('.feedback-card.mine').isVisible());
     assert((await page.locator('.feedback-card.mine details').getAttribute('open')) !== null);
     const item = await page.evaluate(() => HUBU.allFeedback().find((f) => f.mine));
@@ -165,6 +164,7 @@ function pass(name, data = {}) {
         throw new DOMException('Quota exceeded', 'QuotaExceededError');
       };
     });
+    await page.locator('[data-feedback-view=form]').click();
     await page.locator('#feedback-target').selectOption('P4');
     await page.locator('#feedback-text').fill('测试存储失败，不应显示提交成功。');
     await page.locator('button[type=submit]').click();

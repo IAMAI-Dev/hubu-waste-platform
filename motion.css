@@ -1,0 +1,1412 @@
+/* Cinematic campus: geometry, camera and business events share one frame clock. */
+.cinema-campus {
+  --terrain-top: #d4e3d4;
+  --terrain-edge: #9fbaab;
+  --terrain-bottom: #77998d;
+  --roof: #edf3e8;
+  --building-front: #a8c4b4;
+  --building-side: #8eae9f;
+  --scene-ink: #193c34;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  touch-action: pan-y;
+}
+.scene-svg.campus-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+.terrain-top {
+  fill: var(--terrain-top);
+  stroke: #7fa591;
+  stroke-width: 1.2;
+}
+.terrain-shadow {
+  fill: #092d22;
+  opacity: 0.12;
+  filter: blur(16px);
+}
+.terrain-contour {
+  fill: none;
+  stroke: var(--scene-ink);
+  stroke-width: 0.6;
+  opacity: 0.12;
+}
+.scene-tree {
+  fill: #568d71;
+  opacity: 0.65;
+}
+.building-roof {
+  fill: var(--roof);
+  stroke: #acc5b5;
+  stroke-width: 0.6;
+}
+.building-front {
+  fill: var(--building-front);
+}
+.building-side {
+  fill: var(--building-side);
+}
+.building-line {
+  fill: none;
+  stroke: #789e8b;
+  stroke-width: 2;
+}
+.scene-road {
+  fill: none;
+  stroke: #edf2df;
+  stroke-width: 11;
+  stroke-linejoin: round;
+  opacity: 0.55;
+}
+.scene-route {
+  fill: none;
+  stroke: var(--route);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 8;
+  opacity: 0.45;
+}
+.scene-trace {
+  fill: none;
+  stroke: var(--route);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.scene-flow {
+  fill: none;
+  stroke: #fff7ce;
+  stroke-width: 2;
+  stroke-dasharray: 12 180;
+  opacity: 0;
+}
+.scene-flow.flow-active {
+  opacity: 0.9;
+  animation: route-flow 6s linear infinite;
+}
+.route-muted {
+  opacity: 0.1 !important;
+}
+.scene-connector {
+  fill: none;
+  stroke: var(--scene-ink);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  opacity: 0.5;
+  pointer-events: none;
+}
+@keyframes route-flow {
+  to {
+    stroke-dashoffset: -384;
+  }
+}
+.scene-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.scene-markers button {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  background: none;
+  border: 0;
+  padding: 0;
+  pointer-events: auto;
+  color: var(--scene-ink);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  cursor: pointer;
+  z-index: 2;
+}
+.scene-markers button.selected {
+  z-index: 5;
+}
+.point-beacon {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+}
+.point-beacon svg {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  transform: rotate(-90deg);
+}
+.capacity-track {
+  stroke: var(--point);
+  opacity: 0.14;
+  fill: none;
+  stroke-width: 2;
+}
+.capacity-value {
+  stroke: var(--point);
+  fill: none;
+  stroke-width: 2;
+  stroke-dasharray: 125.66;
+  stroke-dashoffset: calc(125.66 * (1 - var(--capacity)));
+}
+.point-beacon i {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--point);
+  box-shadow: 0 2px 12px #123b3430;
+}
+.scene-label {
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface, #fff);
+  color: var(--text, #182c29);
+  border: 1px solid var(--border, #dce6e0);
+  padding: 3px 7px;
+  border-radius: 5px;
+  box-shadow: 0 3px 10px #061d1610;
+  transition: opacity 0.2s;
+}
+.point-percent {
+  display: none;
+  font:
+    12px Bahnschrift,
+    sans-serif;
+  background: var(--point);
+  color: #fff;
+  border-radius: 4px;
+  padding: 2px 5px;
+  margin-top: 3px;
+}
+.selected .point-percent {
+  display: block;
+}
+.has-scene-selection .scene-point:not(.selected):not(.is-full) .scene-label {
+  opacity: 0.3;
+}
+.scene-point:hover .scene-label {
+  opacity: 1 !important;
+}
+.vehicle-shell {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 28px;
+  background: var(--route);
+  border: 2px solid white;
+  border-radius: 8px;
+  box-shadow: 0 3px 14px #102e3440;
+  color: white;
+}
+.vehicle-shell svg {
+  width: 21px;
+  height: 21px;
+}
+.scene-truck .scene-label {
+  margin-top: 4px;
+  font-size: 10px;
+}
+.selected .point-beacon:after,
+.collection-flash .point-beacon:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--point);
+  border-radius: 50%;
+  animation: beacon-wave 1.8s ease-out infinite;
+}
+.collection-flash .point-beacon:after {
+  animation-duration: 0.7s;
+}
+@keyframes beacon-wave {
+  from {
+    transform: scale(0.65);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+.scene-coordinate-label {
+  position: absolute;
+  right: 30px;
+  bottom: 105px;
+  font:
+    10px Bahnschrift,
+    sans-serif;
+  letter-spacing: 3px;
+  color: var(--scene-ink);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.scene-coordinate-label span {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+.scene-caption {
+  position: absolute;
+  left: 28px;
+  bottom: 28px;
+  color: var(--scene-ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  pointer-events: none;
+}
+.scene-caption > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.scene-caption svg {
+  width: 16px;
+  height: 16px;
+}
+.scene-caption small {
+  opacity: 0.6;
+}
+.cinema-campus .map-tools {
+  position: absolute;
+  right: 22px;
+  bottom: 116px;
+  z-index: 6;
+}
+.data-flight {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  padding: 8px 15px;
+  color: #f6ffed;
+  background: #193c34;
+  border: 1px solid #a7c7a8;
+  border-radius: 30px;
+  font:
+    600 16px Bahnschrift,
+    sans-serif;
+  box-shadow: 0 4px 25px #173d3425;
+}
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(35px);
+  transition:
+    opacity 0.8s,
+    transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+/* Native scrolling edits a continuous, reversible campus shot. */
+.cinematic-home {
+  overflow: clip;
+}
+.scroll-story {
+  height: 420svh;
+  position: relative;
+}
+.story-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 630px;
+  overflow: hidden;
+  background: #ecf1e8;
+  color: #193c34;
+  isolation: isolate;
+}
+.story-stage:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #102f28;
+  opacity: var(--story-darkness, 0);
+  z-index: -1;
+}
+.home-campus {
+  position: absolute;
+  inset: 0;
+}
+.story-vignette {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #edf2e818, transparent 65%);
+  pointer-events: none;
+}
+.cinema-hero,
+.story-narrative,
+.story-finale {
+  position: absolute;
+  left: 6.3%;
+  top: 23%;
+  width: 49%;
+  max-width: 790px;
+  z-index: 4;
+}
+.cinema-hero h1 {
+  font-size: clamp(54px, 6.9vw, 108px);
+  line-height: 1.15;
+  letter-spacing: -0.065em;
+  margin: 28px 0;
+}
+.cinema-hero h1 span {
+  display: block;
+}
+.cinema-hero h1 span:last-child {
+  color: #54826c;
+}
+.cinema-hero p {
+  max-width: 390px;
+  font-size: 15px;
+  line-height: 1.9;
+  color: #567366;
+}
+.cinema-hero .hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
+.scroll-cue {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 48px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.scroll-cue svg {
+  width: 17px;
+  height: 17px;
+}
+.story-narrative {
+  top: 28%;
+  width: 35%;
+  opacity: 0;
+  pointer-events: none;
+}
+.story-narrative h2 {
+  font-size: clamp(36px, 4.1vw, 64px);
+  line-height: 1.22;
+  letter-spacing: -0.04em;
+  margin: 18px 0;
+}
+.story-narrative p {
+  max-width: 370px;
+  font-size: 15px;
+  line-height: 1.9;
+  opacity: 0.72;
+}
+.story-large-number,
+#story-large-number {
+  position: absolute;
+  top: -95px;
+  left: -9px;
+  font:
+    160px Bahnschrift,
+    sans-serif;
+  opacity: 0.06;
+  z-index: -1;
+}
+#story-fact {
+  display: inline-block;
+  border-top: 1px solid #9dbcb74d;
+  margin-top: 24px;
+  padding-top: 18px;
+  font:
+    14px Bahnschrift,
+    'Microsoft YaHei',
+    sans-serif;
+  letter-spacing: 1px;
+}
+.night-scene {
+  color: #e7f0df;
+}
+.night-scene .eyebrow {
+  color: #a9cbb5;
+}
+.night-scene .cinema-campus {
+  --terrain-top: #244d3e;
+  --terrain-edge: #173e33;
+  --terrain-bottom: #0b241f;
+  --roof: #72937a;
+  --building-front: #426c55;
+  --building-side: #315942;
+  --scene-ink: #bcddc9;
+}
+.night-scene .scene-road {
+  stroke: #709379;
+  opacity: 0.22;
+}
+.night-scene .scene-tree {
+  fill: #3c6d4c;
+}
+.night-scene .scene-label {
+  background: #18392f;
+  color: #dceadc;
+  border-color: #3c6550;
+}
+.story-finale {
+  top: 26%;
+  opacity: 0;
+  width: 42%;
+}
+.story-finale h2 {
+  font-size: clamp(40px, 4.7vw, 72px);
+  line-height: 1.25;
+  letter-spacing: -0.04em;
+}
+.story-finale p {
+  line-height: 1.8;
+  max-width: 330px;
+  margin-bottom: 25px;
+}
+.story-time {
+  position: absolute;
+  right: 5%;
+  top: 7%;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+.story-time b {
+  font:
+    28px Bahnschrift,
+    sans-serif;
+}
+.story-time span {
+  opacity: 0.6;
+}
+.story-chapters {
+  position: absolute;
+  left: 6.3%;
+  right: 6.3%;
+  bottom: 42px;
+  display: flex;
+  border-top: 1px solid #729a7c55;
+  z-index: 6;
+}
+.story-chapters button {
+  flex: 1;
+  border: 0;
+  border-top: 2px solid transparent;
+  background: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 18px 0;
+  min-height: 52px;
+  text-align: left;
+  opacity: 0.45;
+  cursor: pointer;
+  font-size: 12px;
+}
+.story-chapters button[aria-current='step'] {
+  opacity: 1;
+  border-color: currentColor;
+}
+.story-chapters button span:first-child {
+  font:
+    17px Bahnschrift,
+    sans-serif;
+}
+.story-scroll-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #50745a20;
+}
+.story-scroll-progress i {
+  display: block;
+  height: 100%;
+  background: #7baa81;
+  transform-origin: left;
+}
+.home-campus .scene-caption {
+  left: auto;
+  right: 5%;
+  bottom: 135px;
+}
+.home-campus .scene-coordinate-label {
+  right: 5%;
+  bottom: 180px;
+}
+.cinema-summary {
+  padding: 110px 8vw 100px;
+  background: var(--surface);
+}
+.cinema-summary h2 {
+  font-size: clamp(34px, 4vw, 60px);
+  letter-spacing: -0.04em;
+  line-height: 1.3;
+  margin: 25px 0 30px;
+}
+.cinema-numbers {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 50px;
+  border-top: 1px solid var(--border);
+  margin-top: 55px;
+  padding-top: 35px;
+}
+.cinema-numbers > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+}
+.cinema-numbers b {
+  font:
+    clamp(48px, 6vw, 92px) Bahnschrift,
+    sans-serif;
+  letter-spacing: -0.04em;
+}
+.cinema-numbers span {
+  flex-basis: 100%;
+  font-size: 13px;
+  color: var(--muted);
+}
+.cinema-invite {
+  position: relative;
+  overflow: hidden;
+  padding: 100px 8vw 130px;
+  background: #193c34;
+  color: #e6f0df;
+}
+.cinema-invite h2 {
+  position: relative;
+  font-size: clamp(38px, 4.5vw, 70px);
+  letter-spacing: -0.04em;
+  line-height: 1.3;
+  max-width: 720px;
+}
+.cinema-invite p {
+  position: relative;
+  opacity: 0.7;
+  margin-bottom: 30px;
+}
+.cinema-invite .button {
+  position: relative;
+  background: #d2e6ba;
+  color: #193c34;
+}
+.invite-route {
+  position: absolute;
+  width: 65%;
+  height: 100%;
+  right: -10%;
+  top: 0;
+  opacity: 0.17;
+  fill: none;
+  stroke: #b9d2a6;
+  stroke-width: 2;
+}
+.home-page .site-header {
+  position: relative;
+}
+.story-static {
+  display: none;
+}
+[data-theme='dark'] .story-stage {
+  background: #172e26;
+  color: #d9e8d3;
+}
+[data-theme='dark'] .cinema-hero h1 span:last-child {
+  color: #a4c794;
+}
+[data-theme='dark'] .cinema-hero p {
+  color: #aac0ad;
+}
+[data-theme='dark'] .cinema-campus {
+  --terrain-top: #31513d;
+  --terrain-edge: #244230;
+  --terrain-bottom: #1d382d;
+  --roof: #80997b;
+  --building-front: #4d6b50;
+  --building-side: #3a583f;
+  --scene-ink: #c4dec0;
+}
+/* Map fills the stage; instruments sit on top. */
+.dashboard-page .dashboard-main {
+  height: calc(100dvh - 76px);
+  min-height: 720px;
+  position: relative;
+  padding: 0;
+  max-width: none;
+  overflow: hidden;
+  background: #d6e3d5;
+}
+.dashboard-page .workspace {
+  position: absolute;
+  inset: 0;
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+.dashboard-page .map-panel {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+.dashboard-page .dashboard-map {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  background: radial-gradient(ellipse at 55% 45%, #ecf1df, #bdcdbb);
+}
+.dashboard-page .dashboard-heading {
+  position: absolute;
+  top: 24px;
+  left: 26px;
+  right: 26px;
+  z-index: 12;
+  margin: 0;
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  pointer-events: none;
+}
+.dashboard-heading > div {
+  margin-right: auto;
+}
+.dashboard-heading button {
+  pointer-events: auto;
+}
+.dashboard-page .dashboard-heading h1 {
+  font-size: 28px;
+}
+.dashboard-page .metrics {
+  position: absolute;
+  left: 26px;
+  top: 104px;
+  width: min(650px, 55%);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  z-index: 11;
+  margin: 0;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 12px 35px #183b2910;
+}
+.dashboard-page .metrics > div {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 15px 18px;
+  background: transparent;
+  border-right: 1px solid var(--border);
+}
+.dashboard-page .metrics > div:last-child {
+  border-right: 0;
+}
+.dashboard-page .metrics p {
+  margin: 6px 0 0;
+}
+.dashboard-page .metrics b {
+  font-size: 28px;
+}
+.dashboard-page .metric-icon {
+  display: none;
+}
+.dashboard-page .workspace-tabs {
+  position: absolute;
+  left: 26px;
+  top: 213px;
+  z-index: 12;
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 0;
+}
+.workspace-tabs button {
+  min-height: 44px;
+  padding: 8px 10px;
+}
+.dashboard-page .object-panel,
+.dashboard-page .insight-panel {
+  position: absolute;
+  z-index: 10;
+  top: 280px;
+  bottom: 135px;
+  width: 240px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 12px 35px #183b2912;
+  overflow: auto;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+.dashboard-page .object-panel {
+  left: 26px;
+}
+.dashboard-page .insight-panel {
+  right: 26px;
+  top: 183px;
+  width: 285px;
+}
+.dashboard-page .map-topline {
+  position: absolute;
+  z-index: 13;
+  top: 107px;
+  right: 26px;
+  border: 0;
+  padding: 0;
+  background: none;
+  gap: 10px;
+}
+.scene-campusname {
+  display: none;
+}
+.basemap-switch {
+  display: flex;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.basemap-switch button {
+  border: 0;
+  background: none;
+  min-height: 40px;
+  padding: 8px 12px;
+  color: var(--muted);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.basemap-switch button[aria-pressed='true'] {
+  background: var(--brand, #193c34);
+  color: white;
+}
+.dashboard-page .playback {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(840px, calc(100% - 52px));
+  z-index: 16;
+  margin: 0;
+  border-radius: 14px;
+  box-shadow: 0 10px 40px #163c2820;
+}
+.dashboard-page .records-panel {
+  position: absolute;
+  inset: 280px 26px 130px;
+  z-index: 15;
+  width: auto;
+  max-height: none;
+  box-shadow: 0 16px 45px #173f3425;
+}
+.dashboard-page .scene-caption {
+  bottom: 125px;
+  left: 285px;
+}
+.dashboard-page .scene-coordinate-label {
+  right: 340px;
+  bottom: 145px;
+}
+.dashboard-page .cinema-campus .map-tools {
+  right: 330px;
+  bottom: 205px;
+}
+.dashboard-page .scene-only .metrics,
+.dashboard-page .scene-only .object-panel,
+.dashboard-page .scene-only .insight-panel,
+.dashboard-page .scene-only .workspace-tabs {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(18px);
+}
+.dashboard-page .scene-only .map-tools {
+  right: 26px;
+}
+.dashboard-page .workspace[data-view='charts'] .insight-panel {
+  width: 440px;
+  top: 183px;
+}
+.dashboard-page .workspace[data-view='charts'] .object-panel {
+  opacity: 0;
+  pointer-events: none;
+}
+.dashboard-page .chart {
+  min-height: 165px;
+}
+.dashboard-page .rank-chart {
+  min-height: 180px;
+}
+.dashboard-page .is-scrubbing .scene-svg {
+  filter: brightness(1.1);
+}
+.dashboard-page .is-scrubbing:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: linear-gradient(90deg, transparent 45%, #c6e3c335 50%, transparent 55%);
+  animation: time-scan 0.8s ease-out;
+}
+@keyframes time-scan {
+  from {
+    transform: translateX(-70%);
+  }
+  to {
+    transform: translateX(70%);
+  }
+}
+[data-theme='dark'] .dashboard-page .dashboard-map {
+  background: radial-gradient(ellipse at 55% 45%, #294737, #10251d);
+}
+.feedback-page .feedback-card {
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s;
+}
+.feedback-page .feedback-card:hover {
+  border-color: #8da994;
+  box-shadow: 0 12px 35px #163c2810;
+}
+.feedback-page .rating-options button {
+  transition: transform 0.2s cubic-bezier(0.2, 1.5, 0.3, 1);
+}
+.feedback-page .rating-options button:hover {
+  transform: translateY(-4px) scale(1.08);
+}
+.feedback-arrival {
+  animation: feedback-arrival 1.2s ease-out;
+}
+@keyframes feedback-arrival {
+  from {
+    box-shadow: 0 0 0 8px #81ad8638;
+    transform: translateY(20px);
+    opacity: 0.3;
+  }
+  to {
+    box-shadow: 0 0 0 0 #81ad8600;
+    transform: none;
+    opacity: 1;
+  }
+}
+@media (max-width: 1279px) {
+  .scroll-story {
+    height: 340svh;
+  }
+  .dashboard-page .object-panel {
+    display: none;
+  }
+  .dashboard-page .workspace[data-view='points'] .object-panel,
+  .dashboard-page .workspace[data-view='trucks'] .object-panel {
+    display: flex;
+    z-index: 14;
+    top: 280px;
+    width: 270px;
+  }
+  .dashboard-page .metrics {
+    width: 55%;
+  }
+  .dashboard-page .metrics > div {
+    padding: 14px 10px;
+  }
+  .dashboard-page .map-topline {
+    gap: 5px;
+  }
+  .dashboard-page .map-topline #follow-button {
+    font-size: 0;
+    width: 44px;
+    padding: 10px;
+  }
+  .dashboard-page .map-topline #follow-button svg {
+    width: 18px;
+  }
+  .dashboard-page .scene-caption {
+    left: 26px;
+  }
+  .dashboard-page .insight-panel {
+    width: 260px;
+  }
+  .dashboard-page .cinema-campus .map-tools {
+    right: 305px;
+  }
+  .dashboard-page .scene-coordinate-label {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .scroll-story {
+    height: 260svh;
+  }
+  .story-stage {
+    min-height: 630px;
+  }
+  .cinema-hero,
+  .story-narrative,
+  .story-finale {
+    left: 24px;
+    top: 9%;
+    width: calc(100% - 48px);
+  }
+  .cinema-hero h1 {
+    font-size: 46px;
+    margin: 20px 0;
+  }
+  .cinema-hero p {
+    max-width: 285px;
+    font-size: 13px;
+  }
+  .cinema-hero .hero-actions {
+    margin-top: 18px;
+    gap: 8px;
+  }
+  .cinema-hero .hero-actions .button {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+  .scroll-cue {
+    display: none;
+  }
+  .story-narrative {
+    top: 12%;
+    width: 80%;
+  }
+  .story-narrative h2 {
+    font-size: 34px;
+    max-width: 310px;
+    margin: 12px 0;
+  }
+  .story-narrative p {
+    font-size: 13px;
+    max-width: 300px;
+  }
+  .story-large-number,
+  #story-large-number {
+    font-size: 100px;
+    top: -45px;
+  }
+  .story-finale {
+    top: 12%;
+  }
+  .story-finale h2 {
+    font-size: 36px;
+    max-width: 300px;
+  }
+  .story-time {
+    top: auto;
+    bottom: 150px;
+    right: 24px;
+  }
+  .story-time b {
+    font-size: 21px;
+  }
+  .story-time span {
+    font-size: 9px;
+  }
+  .story-chapters {
+    left: 22px;
+    right: 22px;
+    bottom: 42px;
+  }
+  .story-chapters button {
+    flex-direction: column;
+    gap: 7px;
+    align-items: flex-start;
+    font-size: 10px;
+    padding: 14px 0;
+    min-width: 0;
+  }
+  .home-campus .scene-caption {
+    bottom: 126px;
+    right: 24px;
+    font-size: 10px;
+  }
+  .home-campus .scene-coordinate-label {
+    display: none;
+  }
+  .home-campus .scene-label {
+    font-size: 9px;
+  }
+  .home-campus .scene-point:not(.selected) .scene-label {
+    display: none;
+  }
+  .cinema-summary {
+    padding: 65px 24px;
+  }
+  .cinema-summary h2 {
+    font-size: 32px;
+  }
+  .cinema-numbers {
+    gap: 12px;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    margin-top: 30px;
+    padding-top: 25px;
+  }
+  .cinema-numbers b {
+    font-size: 39px;
+  }
+  .cinema-numbers span {
+    font-size: 11px;
+  }
+  .cinema-numbers small {
+    font-size: 10px;
+  }
+  .cinema-invite {
+    padding: 65px 24px 85px;
+  }
+  .cinema-invite h2 {
+    font-size: 34px;
+  }
+  .cinema-invite p {
+    font-size: 13px;
+    max-width: 280px;
+  }
+  .invite-route {
+    width: 100%;
+    right: -20%;
+  }
+  .dashboard-page .dashboard-main {
+    height: calc(100dvh - 140px - env(safe-area-inset-bottom));
+    min-height: 660px;
+    padding: 0;
+    display: block;
+  }
+  .dashboard-page .dashboard-heading {
+    top: 18px;
+    left: 14px;
+    right: 14px;
+    gap: 6px;
+  }
+  .dashboard-page .dashboard-heading h1 {
+    font-size: 23px;
+  }
+  .dashboard-heading .eyebrow {
+    font-size: 9px;
+  }
+  .dashboard-heading .small-live {
+    display: none;
+  }
+  .dashboard-page .dashboard-heading button {
+    padding: 8px;
+    font-size: 11px;
+    min-height: 44px;
+  }
+  .dashboard-heading #toggle-panels span:last-child {
+    display: none;
+  }
+  .dashboard-page .metrics {
+    top: 86px;
+    left: 14px;
+    right: 14px;
+    width: auto;
+    border-radius: 10px;
+  }
+  .dashboard-page .metrics > div {
+    padding: 12px 9px;
+  }
+  .dashboard-page .metrics > div > span {
+    font-size: 10px;
+  }
+  .dashboard-page .metrics b {
+    font-size: 21px;
+  }
+  .dashboard-page .metrics small {
+    font-size: 9px;
+    margin-left: 2px;
+  }
+  .dashboard-page .workspace-tabs {
+    top: 174px;
+    left: 14px;
+    right: 14px;
+    justify-content: space-around;
+  }
+  .dashboard-page .workspace-tabs button {
+    font-size: 11px;
+    padding: 7px;
+    gap: 5px;
+  }
+  .dashboard-page .map-topline {
+    top: 233px;
+    left: 14px;
+    right: 14px;
+    justify-content: space-between;
+  }
+  .dashboard-page .map-topline #follow-button {
+    font-size: 11px;
+    width: auto;
+  }
+  .basemap-switch button {
+    min-height: 38px;
+    font-size: 11px;
+    padding: 7px 10px;
+  }
+  .dashboard-page .object-panel,
+  .dashboard-page .workspace[data-view='points'] .object-panel,
+  .dashboard-page .workspace[data-view='trucks'] .object-panel {
+    inset: 292px 14px 114px;
+    width: auto;
+  }
+  .dashboard-page .workspace[data-view='points'] .map-panel,
+  .dashboard-page .workspace[data-view='trucks'] .map-panel,
+  .dashboard-page .workspace[data-view='charts'] .map-panel,
+  .dashboard-page .workspace[data-view='records'] .map-panel {
+    visibility: visible;
+  }
+  .dashboard-page .insight-panel {
+    display: none;
+  }
+  .dashboard-page .workspace[data-view='charts'] .insight-panel {
+    display: block;
+    inset: 292px 14px 114px;
+    width: auto;
+    max-height: none;
+  }
+  .dashboard-page .workspace.has-selection[data-view='map'] .insight-panel {
+    display: block;
+    top: auto;
+    left: 14px;
+    right: 14px;
+    bottom: 110px;
+    width: auto;
+    max-height: 240px;
+    z-index: 14;
+  }
+  .dashboard-page .playback {
+    left: 14px;
+    right: 14px;
+    bottom: 12px;
+    width: auto;
+    transform: none;
+    padding: 12px;
+    border-radius: 12px;
+  }
+  .dashboard-page .scene-caption {
+    bottom: 110px;
+    left: 18px;
+    font-size: 9px;
+    gap: 5px;
+  }
+  .dashboard-page .scene-caption small {
+    font-size: 9px;
+  }
+  .dashboard-page .cinema-campus .map-tools {
+    right: 15px;
+    bottom: 125px;
+  }
+  .dashboard-page .workspace.has-selection .map-tools {
+    bottom: 365px;
+  }
+  .dashboard-page .records-panel {
+    inset: 292px 14px 114px;
+  }
+  .dashboard-page .scene-label {
+    font-size: 10px;
+  }
+  .dashboard-page .scene-point:not(.selected):not(.is-full) .scene-label {
+    display: none;
+  }
+  .dashboard-page .scene-only .workspace.has-selection .insight-panel {
+    display: none;
+  }
+  .dashboard-page.tour-active .map-topline {
+    top: 90px;
+  }
+  .dashboard-page.tour-active .workspace {
+    min-height: 0;
+  }
+  .dashboard-page.tour-active .dashboard-main {
+    min-height: 660px;
+  }
+  .dashboard-page.tour-active .workspace.has-selection .insight-panel {
+    display: none;
+  }
+  .dashboard-page.tour-active .scene-caption {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  .scroll-story {
+    height: auto;
+  }
+  .story-stage {
+    position: relative;
+    height: 780px;
+  }
+  .story-static {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    padding: 50px 6vw;
+    background: var(--surface);
+  }
+  .story-static article {
+    padding: 25px;
+    border-top: 1px solid var(--border);
+  }
+  .story-chapters {
+    display: none;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .scroll-story {
+    height: auto;
+  }
+  .story-stage {
+    position: relative;
+    height: 620px;
+  }
+  .story-static {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 30px;
+    background: var(--surface);
+  }
+  .story-chapters {
+    display: none;
+  }
+  .dashboard-page .dashboard-main {
+    min-height: 720px;
+  }
+}
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .story-static {
+    grid-template-columns: 1fr;
+  }
+  .story-stage {
+    height: 760px;
+  }
+}
+
+:root {
+  --border: var(--line);
+  --text: var(--ink);
+}
+.dashboard-page .metrics {
+  padding: 0;
+}
+.dashboard-page .map-topline > .scene-campusname {
+  display: none;
+}
+.dashboard-page .dashboard-main {
+  min-height: 620px;
+}
+#story-fact {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  max-width: 340px;
+}
+#story-fact b {
+  font:
+    42px Bahnschrift,
+    sans-serif;
+}
+#story-fact b small {
+  font-size: 16px;
+}
+#story-fact > span {
+  font-size: 11px;
+  line-height: 1.8;
+  opacity: 0.7;
+}
+@media (max-width: 767px) {
+  .dashboard-page .dashboard-main {
+    min-height: 660px;
+  }
+  .scene-truck .vehicle-shell {
+    width: 30px;
+    height: 26px;
+  }
+  #story-fact b {
+    font-size: 32px;
+  }
+  #story-fact {
+    margin-top: 10px;
+    padding-top: 12px;
+  }
+  .dashboard-page .metrics p {
+    gap: 3px;
+  }
+}
+
+@media (max-width: 767px) {
+  .story-stage {
+    height: calc(100svh - 64px);
+  }
+  .story-chapters {
+    bottom: 20px;
+  }
+  .home-campus .scene-caption {
+    bottom: 105px;
+  }
+  .story-time {
+    bottom: 133px;
+  }
+  .dashboard-page .dashboard-main:has(.has-selection) .metrics {
+    display: none;
+  }
+  .dashboard-page .dashboard-main:has(.has-selection) .workspace-tabs {
+    top: 86px;
+  }
+  .dashboard-page .workspace.has-selection .map-topline {
+    top: 145px;
+  }
+}
+
+.motion-paused .scene-flow {
+  animation-play-state: paused;
+}
+
+.scene-offscreen .scene-flow {
+  animation-play-state: paused;
+}
+.basemap-switch button {
+  min-height: 44px;
+}
+
+.scene-ghost {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  color: var(--scene-ink);
+  border: 1px dashed currentColor;
+  border-radius: 9px;
+  padding: 8px;
+  opacity: 0.4;
+}
+.scene-ghost svg {
+  width: 20px;
+  height: 20px;
+}

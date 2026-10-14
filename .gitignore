@@ -9,3 +9,6 @@ node_modules/
 Thumbs.db
 qa/*-initial.png
 qa/browser-profile/
+
+# Unnamed recordings from interrupted acceptance runs
+qa/cinematic/page@*.webm

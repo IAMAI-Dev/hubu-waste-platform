@@ -159,6 +159,7 @@
         : '';
     $('feedback-list').innerHTML =
       spot + (fs.map(card).join('') || '<p class="empty-state">当前筛选条件下没有反馈</p>');
+    HUBU_MOTION.details($('feedback-list'));
   }
   document.addEventListener('click', function (e) {
     var b = e.target.closest('button');
@@ -168,7 +169,18 @@
       rating = +b.dataset.rating || null;
       stars();
       var selected = $('rating-options').querySelector('[data-rating="' + (rating || 0) + '"]');
-      if (selected) selected.focus();
+      if (selected) {
+        selected.focus();
+        HUBU_MOTION.animate(
+          selected,
+          [
+            { transform: 'scale(.85)' },
+            { transform: 'scale(1.2)', offset: 0.55 },
+            { transform: 'scale(1)' },
+          ],
+          { duration: 360 },
+        );
+      }
     }
     if (b.dataset.progress) {
       view('list');
@@ -225,7 +237,18 @@
     $('submit-result').hidden = false;
     $('feedback-text').value = '';
     $('text-count').textContent = '0 / 300';
+    $('filter-type').value = 'all';
+    $('filter-status').value = 'all';
     render();
+    if (innerWidth < 768) view('list');
+    var card = document.getElementById('feedback-' + result.id);
+    if (card) {
+      card.querySelector('details').open = true;
+      card.classList.add('feedback-arrival');
+      card.scrollIntoView({ behavior: U.reduced() ? 'instant' : 'smooth', block: 'center' });
+      if (innerWidth >= 768) HUBU_MOTION.flight($('submit-result'), card, '已保存');
+    }
+    HUBU_MOTION.details($('feedback-list'));
     U.announce('反馈已保存到本机浏览器');
   };
   $('clear-feedback').onclick = function () {
@@ -249,5 +272,14 @@
   issue();
   render();
   if (contextOrder) view('list');
+  HUBU_MOTION.details($('feedback-list'));
+  HUBU_MOTION.animate(
+    document.querySelector('main'),
+    [
+      { opacity: 0, transform: 'translateY(20px)' },
+      { opacity: 1, transform: 'none' },
+    ],
+    { duration: 550 },
+  );
   H.saveTime();
 })();

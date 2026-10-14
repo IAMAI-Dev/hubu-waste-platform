@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "name": "scroll story reversible and independent 1366",
+      "passed": true,
+      "demoIsolation": true
+    },
+    {
+      "name": "immersive selection, following and scrub 1366",
+      "passed": true
+    },
+    {
+      "name": "scroll story reversible and independent 390",
+      "passed": true,
+      "demoIsolation": true
+    },
+    {
+      "name": "immersive selection, following and scrub 390",
+      "passed": true
+    },
+    {
+      "name": "reduced motion exposes four static chapters",
+      "passed": true
+    },
+    {
+      "name": "no cinematic browser exceptions",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

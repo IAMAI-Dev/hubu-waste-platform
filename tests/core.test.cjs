@@ -205,4 +205,38 @@ test('reload ignores an orphan work order from an interrupted two-key write', ()
   const h = boot(l);
   assert.equal(h.getOrder('UO-orphan'), null);
 });
+test('independent demo engines preserve populated storage and normal playback', () => {
+  const local = storage(),
+    session = storage(),
+    h = boot(local, session);
+  const feedback = h.addFeedback({
+    targetId: 'P4',
+    type: '问题反馈',
+    issueType: 'dirty',
+    text: '保留这条真实本机提交用于隔离测试。',
+  });
+  assert(feedback.ok);
+  h.setPlayback({ playing: false, speed: 16, selected: { kind: 'truck', id: 'T2' }, follow: 'T2' });
+  h.saveTime();
+  const original = JSON.stringify(h.getSnapshot()),
+    localBefore = JSON.stringify(local.data),
+    sessionBefore = JSON.stringify(session.data);
+  const a = h.createDemoSession(),
+    b = h.createDemoSession(),
+    initial = b.getSnapshot().time;
+  a.seek(a.milestones.done);
+  assert.equal(b.getSnapshot().time, initial);
+  assert(!a.getSnapshot().orders.some((o) => o.id === feedback.orderId));
+  a.seek(a.milestones.before);
+  a.seek(a.milestones.done);
+  b.seek(b.milestones.done);
+  assert.equal(state(a), state(b));
+  a.dispose();
+  const ended = a.getSnapshot().time;
+  a.seek(1200);
+  assert.equal(a.getSnapshot().time, ended);
+  assert.equal(JSON.stringify(h.getSnapshot()), original);
+  assert.equal(JSON.stringify(local.data), localBefore);
+  assert.equal(JSON.stringify(session.data), sessionBefore);
+});
 fs.writeFileSync(root + 'qa/core-results.json', JSON.stringify(results, null, 2));
