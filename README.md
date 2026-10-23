@@ -10,7 +10,7 @@
 if (!(Test-Path -LiteralPath '.\map-config.js')) {
   Copy-Item -LiteralPath '.\map-config.example.js' -Destination '.\map-config.js'
 }
-python -m http.server 8765 --bind 127.0.0.1
+python preview.py 8765
 ```
 
 打开 <http://127.0.0.1:8765/index.html>。请使用同源 HTTP 服务，避免直接双击 HTML 导致跨页存储行为不一致。
@@ -121,3 +121,12 @@ git log --oneline
 当前仅使用本地版本控制。需要多人同步时，再由小组确定远程仓库地址和托管平台。
 
 2026-10-23 校园模型重绘：[设计说明与验收截图](qa/campus-model/README.md)。模型位置沿用现有点位，建筑细节按功能示意设计。
+
+
+## 预览缓存更新
+
+使用 `python preview.py 8765` 启动本地预览。该服务固定从当前项目目录提供资源，返回 `Cache-Control: no-store`，并禁止 Windows 同端口重复监听。若端口已被占用，先关闭旧预览进程。
+
+三个页面的公共脚本、样式及图标带内容指纹。修改静态资源后运行 `python tools/version_assets.py` 更新引用；页面仍无需构建。该命令不修改本机地图配置。旧标签页可通过带查询参数的页面地址重新进入，例如 `http://127.0.0.1:8765/detail.html?v=campus-model-20261023`。
+
+2026-10-23 缓存修复验证：模拟上一版 scene.js 被浏览器缓存后，普通刷新能加载版本化资源并显示六组新模型；预览响应不受旧条件请求影响。检查源码为 `tests/cache.test.cjs`，结果见 `qa/cache/results.json`。

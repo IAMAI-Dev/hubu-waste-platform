@@ -1,0 +1,25 @@
+{
+  "staleModelReproduced": true,
+  "versionedReloadShowsSixLandmarks": true,
+  "loaded": [
+    "http://127.0.0.1:55296/campus-model.js?v=f81291b19b6f",
+    "http://127.0.0.1:55296/scene.js?v=c6ce597849ae"
+  ],
+  "responses": [
+    {
+      "asset": "detail.html",
+      "status": 200,
+      "cacheControl": "no-store, no-cache, must-revalidate, max-age=0"
+    },
+    {
+      "asset": "scene.js",
+      "status": 200,
+      "cacheControl": "no-store, no-cache, must-revalidate, max-age=0"
+    },
+    {
+      "asset": "campus-model.js",
+      "status": 200,
+      "cacheControl": "no-store, no-cache, must-revalidate, max-age=0"
+    }
+  ]
+}
