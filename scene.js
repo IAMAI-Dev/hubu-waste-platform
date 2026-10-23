@@ -264,7 +264,9 @@
       Object.keys(camera).forEach(
         (k) =>
           (camera[k] =
-            Math.abs(camera[k] - target[k]) < 0.001 ? target[k] : M.lerp(camera[k], target[k], f)),
+            Math.abs(camera[k] - target[k]) < 0.001
+              ? target[k]
+              : M.lerp(camera[k], target[k], f)),
       );
       geometry();
       s.points.forEach((p) => {
@@ -322,11 +324,11 @@
     function event(e) {
       const b = markers[e.pid];
       if (!b) return;
-      U.announce(e.station + '完成收运，' + e.kg + '千克');
+      U.announce(e.station + '完成收运，' + e.kg.toFixed(1) + '千克');
       M.pulse(b);
       b.classList.add('collection-flash');
       setTimeout(() => b.classList.remove('collection-flash'), 1100);
-      M.flight(b, document.getElementById('metric-kg'), e.kg + ' kg');
+      M.flight(b, document.getElementById('metric-kg'), e.kg.toFixed(1) + ' kg');
     }
     return {
       paint,

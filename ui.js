@@ -72,13 +72,14 @@
     H.applyTheme(H.readTheme());
     var links = [
       ['index.html', 'home', '校园概览', 'leaf'],
+      ['monitor.html', 'monitor', '投放与暂存', 'bin'],
       ['detail.html', 'dashboard', '清运看板', 'map'],
       ['feedback.html', 'feedback', '反馈中心', 'message'],
     ];
     document.getElementById('site-header').innerHTML =
       '<a class="brand" href="index.html" aria-label="琴园智清首页"><span class="brand-mark">' +
       icon('leaf') +
-      '</span><span><b>琴园智清</b><small>湖北大学 · 校园清运</small></span></a><nav class="main-nav" aria-label="主导航">' +
+      '</span><span><b>琴园智清</b><small>湖北大学 · 全过程管理</small></span></a><nav class="main-nav" aria-label="主导航">' +
       links
         .map(function (l) {
           return (
@@ -102,6 +103,17 @@
         .querySelector('.theme-switch')
         .setAttribute('aria-label', dark ? '切换浅色主题' : '切换深色主题');
     }
+    const info = document.createElement('button');
+    info.className = 'icon-btn';
+    info.setAttribute('aria-label', '原型与数据口径说明');
+    info.innerHTML = icon('info');
+    document.querySelector('.header-tools').prepend(info);
+    const dialog = document.createElement('dialog');
+    dialog.className = 'prototype-dialog';
+    dialog.innerHTML =
+      '<h2>原型与数据口径</h2><p>本平台为纯前端模拟演示，尚未接入摄像头、称重设备或实际后勤系统。本机反馈仅保存在当前浏览器。</p><p>投放批次表示投放事件数，不表示人数或垃圾件数。容量以升计，收运重量以千克计；两者分别记账。</p><p>重量由确定性模拟批次生成，使用分类密度参数（0.12 / 0.45 / 0.20 / 0.16 kg/L），不是摄像头称重。开场存量纳入对账；到站按先入先出收运 95% 库存。</p><p>60% / 85% / 100% 容量阈值、15 分钟满载和 120 分钟厨余暂存规则均为原型配置，不代表学校现行标准。地图点位和设施配置用于方案演示，治理建议需现场核查。</p><form method="dialog"><button class="button primary">知道了</button></form>';
+    document.body.append(dialog);
+    info.onclick = () => dialog.showModal();
     themeLabel();
     document.querySelector('.theme-switch').addEventListener('click', function () {
       H.toggleTheme();

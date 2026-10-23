@@ -3649,7 +3649,37 @@ dialog::backdrop {
   user-select: none;
   -webkit-user-select: none;
 }
-.zoomed-out .point-label,.amap-point.quiet .amap-point-label { opacity:0; }
-.zoomed-out .point-marks .selected .point-label,.zoomed-out .point-marks .overflow .point-label,.zoomed-out .point-marks>g:focus-visible .point-label,.zoomed-out .point-marks>g:hover .point-label { opacity:1; }
+.zoomed-out .point-label,
+.amap-point.quiet .amap-point-label {
+  opacity: 0;
+}
+.zoomed-out .point-marks .selected .point-label,
+.zoomed-out .point-marks .overflow .point-label,
+.zoomed-out .point-marks > g:focus-visible .point-label,
+.zoomed-out .point-marks > g:hover .point-label {
+  opacity: 1;
+}
 
-.amap-point,.amap-truck { width:44px; height:44px; }
+.amap-point,
+.amap-truck {
+  width: 44px;
+  height: 44px;
+}
+
+.prototype-dialog {
+  max-width: 580px;
+  width: calc(100% - 32px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 28px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.prototype-dialog::backdrop {
+  background: #10251dcc;
+  backdrop-filter: blur(5px);
+}
+.prototype-dialog p {
+  font-size: 14px;
+  line-height: 1.8;
+}

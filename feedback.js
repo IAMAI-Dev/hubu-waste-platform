@@ -16,7 +16,9 @@
     }).join('') +
     '</optgroup><optgroup label="清运车辆">' +
     H.TRUCKS.map(function (t) {
-      return '<option value="' + t.id + '">' + U.esc(t.code + ' 号车 · ' + t.name) + '</option>';
+      return (
+        '<option value="' + t.id + '">' + U.esc(t.code + ' 号车 · ' + t.name) + '</option>'
+      );
     }).join('') +
     '</optgroup>';
   if (
@@ -51,7 +53,9 @@
         })
         .join('') +
       '<button class="text-button rating-reset" type="button" data-rating="0">不评分</button>';
-    $('rating-description').textContent = rating ? rating + ' / 5 分' : '未评分，不计入满意度统计';
+    $('rating-description').textContent = rating
+      ? rating + ' / 5 分'
+      : '未评分，不计入满意度统计';
   }
   function issue() {
     $('issue-field').hidden = !(
@@ -136,6 +140,9 @@
     $('feedback-sim-time').textContent = H.fmt(H.getNow());
     var fs = H.allFeedback().filter(function (f) {
       return (
+        (params.get('scope') !== 'point' ||
+          f.targetId === params.get('point') ||
+          f.target === H.byId(params.get('point'))?.name) &&
         ($('filter-type').value === 'all' || f.type === $('filter-type').value) &&
         ($('filter-status').value === 'all' || f.status === $('filter-status').value) &&
         (!$('filter-mine').checked || f.mine)
@@ -271,7 +278,7 @@
   stars();
   issue();
   render();
-  if (contextOrder) view('list');
+  if (contextOrder || params.get('scope') === 'point') view('list');
   HUBU_MOTION.details($('feedback-list'));
   HUBU_MOTION.animate(
     document.querySelector('main'),

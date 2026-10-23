@@ -19,7 +19,7 @@ def stamp(match):
 
 
 if __name__ == "__main__":
-    for name in ("index.html", "detail.html", "feedback.html"):
+    for name in ("index.html", "detail.html", "feedback.html", "monitor.html"):
         page = ROOT / name
         original = page.read_text(encoding="utf-8")
         updated = ASSET.sub(stamp, original)

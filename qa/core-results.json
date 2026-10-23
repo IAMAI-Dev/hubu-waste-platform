@@ -34,5 +34,17 @@
   {
     "name": "independent demo engines preserve populated storage and normal playback",
     "passed": true
+  },
+  {
+    "name": "inventory volume and mass reconcile at every minute, including partial collections",
+    "passed": true
+  },
+  {
+    "name": "collection and cleaning have independent completion and midday story restores state",
+    "passed": true
+  },
+  {
+    "name": "new feedback categories retain text and suggestions never create collection orders",
+    "passed": true
   }
 ]

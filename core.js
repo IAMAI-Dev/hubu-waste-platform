@@ -207,6 +207,11 @@
       late: { label: '清运不及时', msg: '等待下一次线路收运' },
       dirty: { label: '周边脏乱', msg: '桶站周边需要保洁' },
       broken: { label: '设备损坏', msg: '桶站设施需要检修' },
+      odor: { label: '异味', msg: '需要保洁并核查密闭设施' },
+      bins: { label: '桶数量不足', msg: '核查分类容器配置' },
+      location: { label: '投放位置不便', msg: '现场核查投放位置' },
+      signage: { label: '分类标识不清', msg: '完善分类标识' },
+      stale: { label: '厨余暂存超时', msg: '厨余暂存超过120分钟' },
       wrong: { label: '分类不准', msg: '需要分类引导与整理' },
     };
     var playback = { playing: true, speed: 1, selected: null, follow: null };
@@ -263,7 +268,12 @@
     }
     function statusOf(p) {
       return p.fill >= 85
-        ? { key: 'full', color: '#BC4B42', text: '已满溢', pill: 'full' }
+        ? {
+            key: 'full',
+            color: '#BC4B42',
+            text: p.fill >= 100 ? '满载' : '满溢风险',
+            pill: 'full',
+          }
         : p.fill >= 60
           ? { key: 'near', color: '#A56717', text: '接近满', pill: 'near' }
           : { key: 'ok', color: '#277B52', text: '正常', pill: 'ok' };
@@ -280,7 +290,8 @@
         if (!stop) return;
         for (var m = Math.floor(at) + 1; m <= DAY_END; m++) {
           if (crossed(lapFrac(t, m - 1), lapFrac(t, m), stop.frac)) {
-            if (!best || m < best.at) best = { at: m, truckId: t.id, name: t.name, code: t.code };
+            if (!best || m < best.at)
+              best = { at: m, truckId: t.id, name: t.name, code: t.code };
             break;
           }
         }
@@ -301,7 +312,7 @@
       return { pid: s.pid, name: s.name, at: at + delta, minutes: Math.ceil(delta) };
     }
     function isCollection(o) {
-      return o.type === 'full' || o.type === 'late';
+      return o.type === 'full' || o.type === 'late' || o.type === 'stale';
     }
     function orderStatus(o, m) {
       if (m < o.at) return 'future';
@@ -333,16 +344,28 @@
       });
     }
     function orderView(o) {
-      return Object.assign({}, o, { status: orderStatus(o, now) });
+      const p = byId(o.pid);
+      return Object.assign({}, o, {
+        status: orderStatus(o, now),
+        priority:
+          isCollection(o) &&
+          orderStatus(o, now) !== 'done' &&
+          !!p &&
+          p.bins.some((b) => b.fullSince !== null && now - b.fullSince >= 15),
+      });
     }
     function createSystemOrder(pid, type, at, src) {
-      if (
-        type === 'full' &&
-        orders.some(function (o) {
-          return o.pid === pid && isCollection(o) && o.at <= at && orderStatus(o, at) !== 'done';
-        })
-      )
-        return;
+      if (['full', 'stale'].includes(type)) {
+        const existing = orders.find(
+          (o) =>
+            o.pid === pid && isCollection(o) && o.at <= at && orderStatus(o, at) !== 'done',
+        );
+        if (existing) {
+          existing.causes = existing.causes || [{ type: existing.type, at: existing.at }];
+          if (!existing.causes.some((c) => c.type === type)) existing.causes.push({ type, at });
+          return;
+        }
+      }
       orders.push(
         decorateOrder({
           id: 'S-' + pid + '-' + type + '-' + at,
@@ -353,6 +376,84 @@
         }),
       );
     }
+    const categories = ['可回收物', '厨余垃圾', '有害垃圾', '其他垃圾'];
+    function inventory(p) {
+      p.bins = categories.map((name, i) => ({
+        name,
+        capacity: i === 2 ? 60 : 240,
+        count: 1,
+        batches: [
+          {
+            at: 300 + i * 12,
+            liters: ((i === 2 ? 60 : 240) * p.init) / 100,
+            kg: (((i === 2 ? 60 : 240) * p.init) / 100) * [0.12, 0.45, 0.2, 0.16][i],
+          },
+        ],
+      }));
+      p.deposits = [];
+      p.inputKg = 0;
+      p.inputLiters = 0;
+      p.collectedLiters = 0;
+      p.initialKg = p.bins.reduce((a, b) => a + b.batches[0].kg, 0);
+      p.initialLiters = p.bins.reduce((a, b) => a + b.batches[0].liters, 0);
+    }
+    function deposit(p, m) {
+      const pattern =
+        p.id === 'P4' ? [1, 1, 3, 1, 0, 1, 3, 1, 2, 3] : [0, 3, 1, 3, 0, 3, 1, 3, 2, 3];
+      const i = pattern[m % pattern.length],
+        b = p.bins[i],
+        liters = p.rate * 7.8 * (m >= 660 && m < 810 ? 1.8 : 1),
+        kg = liters * [0.12, 0.45, 0.2, 0.16][i];
+      b.batches.push({ at: m, liters, kg });
+      p.deposits.push({ id: p.id + '-' + m, at: m, category: b.name, liters, kg });
+      p.inputKg += kg;
+      p.inputLiters += liters;
+      refreshInventory(p, m);
+    }
+    function refreshInventory(p, m) {
+      p.bins.forEach((b) => {
+        b.liters = b.batches.reduce((a, x) => a + x.liters, 0);
+        b.kg = b.batches.reduce((a, x) => a + x.kg, 0);
+        b.fill = (b.liters / b.capacity) * 100;
+        b.oldest = b.batches.length ? b.batches[0].at : null;
+        b.age = b.oldest === null ? 0 : m - b.oldest;
+        if (b.fill >= 100) {
+          if (b.fullSince == null) b.fullSince = m;
+        } else b.fullSince = null;
+      });
+      p.fill = Math.max(...p.bins.map((b) => b.fill));
+    }
+    function monitoring(pid) {
+      const p = byId(pid);
+      if (!p) return null;
+      const clean = visibleOrders().filter(
+        (o) =>
+          o.pid === pid &&
+          (o.type === 'dirty' || o.type === 'odor') &&
+          orderStatus(o, now) === 'done',
+      );
+      const facilities = { lid: pid !== 'P4', shelter: pid !== 'P2', signage: pid !== 'P6' };
+      return {
+        id: p.id,
+        name: p.name,
+        highCount: p.highCount,
+        facilities,
+        lastClean: clean.length ? Math.max(...clean.map((o) => o.doneAt)) : null,
+        bins: p.bins.map((b) => ({ ...b, batches: undefined })),
+        deposits: p.deposits.slice().reverse(),
+        initialKg: p.initialKg,
+        inputKg: p.inputKg,
+        collectedKg: p.kg,
+        stockKg: p.bins.reduce((a, b) => a + b.kg, 0),
+        initialLiters: p.initialLiters,
+        inputLiters: p.inputLiters,
+        collectedLiters: p.collectedLiters,
+        stockLiters: p.bins.reduce((a, b) => a + b.liters, 0),
+        last: p.last,
+        overdue: p.bins[1].age > 120,
+        priority: p.bins.some((b) => b.fullSince !== null && now - b.fullSince >= 15),
+      };
+    }
     function reset() {
       now = handled = DAY_START;
       events = [];
@@ -360,10 +461,14 @@
       totalKg = totalTrips = 0;
       POINTS.forEach(function (p) {
         p.fill = p.init;
+        inventory(p);
+        refreshInventory(p, DAY_START);
         p.kg = 0;
         p.times = 0;
         p.last = null;
         p._full = false;
+        p._stale = false;
+        p.highCount = 0;
       });
       TRUCKS.forEach(function (t) {
         t.kg = 0;
@@ -385,11 +490,33 @@
     }
     function doCollect(t, pid, m) {
       var p = byId(pid),
-        kg = Math.round(26 + pseudo((m - 1) * 7.3 + pid.charCodeAt(1) * 13.7) * 44);
+        kg = 0;
+      p.bins.forEach((b) => {
+        let remaining = b.liters * 0.95;
+        p.collectedLiters += remaining;
+        while (remaining > 1e-8 && b.batches.length) {
+          const batch = b.batches[0],
+            take = Math.min(remaining, batch.liters),
+            weight = (batch.kg * take) / batch.liters;
+          kg += weight;
+          batch.kg -= weight;
+          batch.liters -= take;
+          remaining -= take;
+          if (batch.liters < 1e-8) b.batches.shift();
+        }
+      });
+      if (
+        pid === 'P4' &&
+        !orders.some(
+          (o) =>
+            o.pid === pid && o.type === 'dirty' && o.at <= m && orderStatus(o, m) !== 'done',
+        )
+      )
+        createSystemOrder(pid, 'dirty', m, '到站环境复检示例');
       p.kg += kg;
       p.times++;
       p.last = m;
-      p.fill = 4 + pseudo((m - 1) * 3.1 + p.kg) * 5;
+      refreshInventory(p, m);
       p._full = false;
       t.kg += kg;
       t.trips++;
@@ -409,7 +536,7 @@
     }
     function advanceMinute(m) {
       POINTS.forEach(function (p) {
-        p.fill = Math.min(100, p.fill + p.rate);
+        deposit(p, m);
       });
       TRUCKS.forEach(function (t) {
         t.stops.forEach(function (s) {
@@ -418,11 +545,26 @@
       });
       // Resolve arrivals first: a point cleared this minute must not retain a new full alert.
       POINTS.forEach(function (p) {
-        if (p.fill >= 85 && !p._full) {
+        const overdue = p.bins[1].age > 120;
+        if (overdue && !p._stale) createSystemOrder(p.id, 'stale', m);
+        p._stale = overdue;
+        if (p.bins.some((b) => b.fill >= 85) && !p._full) {
           p._full = true;
+          p.highCount++;
           createSystemOrder(p.id, 'full', m);
+          if (
+            p.id === 'P4' &&
+            !orders.some(
+              (o) =>
+                o.pid === p.id &&
+                o.type === 'odor' &&
+                o.at <= m &&
+                orderStatus(o, m) !== 'done',
+            )
+          )
+            createSystemOrder(p.id, 'odor', m, '环境巡检示例');
         }
-        if (p.fill < 85) p._full = false;
+        if (p.bins.every((b) => b.fill < 85)) p._full = false;
       });
       revision++;
     }
@@ -455,7 +597,7 @@
       return [
         {
           at: o.at,
-          title: o.src === '系统预警' ? '系统发现满溢' : '收到点位反馈',
+          title: o.src === '系统预警' ? '监测触发处置预警' : '收到点位反馈',
           detail: o.label,
         },
         {
@@ -489,7 +631,9 @@
       );
     }
     function uid(prefix) {
-      return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9);
+      return (
+        prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9)
+      );
     }
     function saveRecords(nextFeedback, nextOrders) {
       if (isolated || engineOptions.demo)
@@ -610,7 +754,11 @@
           out.status = o ? o.status : 'pending';
         } else if (f.type === '问题反馈')
           out.status =
-            now >= f.simulatedAt + 55 ? 'done' : now >= f.simulatedAt + 18 ? 'doing' : 'pending';
+            now >= f.simulatedAt + 55
+              ? 'done'
+              : now >= f.simulatedAt + 18
+                ? 'doing'
+                : 'pending';
         else out.status = 'done';
       }
       return out;
@@ -695,6 +843,7 @@
     function getSnapshot() {
       return {
         time: now,
+        monitoring: POINTS.map((p) => monitoring(p.id)),
         revision: revision,
         totalKg: totalKg,
         totalTrips: totalTrips,
@@ -803,13 +952,13 @@
       tourBackup = null;
       saveTime();
     }
-    function tourMilestones() {
+    function tourMilestones(from = DAY_START) {
       // Discover milestones using the same engine, never a second set of display numbers.
       var old = now;
       stepTo(DAY_START);
-      stepTo(480);
+      stepTo(from === DAY_START ? 480 : DAY_END);
       var o = visibleOrders().find(function (x) {
-        return x.pid === 'P4' && x.type === 'full';
+        return x.pid === 'P4' && x.type === 'full' && x.at >= from;
       });
       var result = {
         before: o.at - 1,
@@ -817,6 +966,7 @@
         assigned: o.assignedAt,
         done: o.doneAt,
         orderId: o.id,
+        clean: o.doneAt + 55,
       };
       stepTo(old);
       return result;
@@ -836,6 +986,7 @@
     );
     if (saved) setPlayback(saved);
     var api = {
+      monitoring: monitoring,
       CAMPUS: CAMPUS,
       CAMPUS_CENTER: CAMPUS_CENTER,
       POINTS: POINTS,

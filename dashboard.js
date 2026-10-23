@@ -124,7 +124,7 @@
     });
     $('object-status').innerHTML =
       k === 'points'
-        ? '<option value="all">全部状态</option><option value="full">已满溢</option><option value="near">接近满</option><option value="ok">正常</option>'
+        ? '<option value="all">全部状态</option><option value="full">满溢风险 / 满载</option><option value="near">接近满</option><option value="ok">正常</option>'
         : '<option value="all">全部状态</option><option value="working">到站作业</option><option value="moving">行驶中</option>';
     lastList = '';
     render(H.getSnapshot());
@@ -158,7 +158,7 @@
             '</b></span><span class="object-row-meta"><span>' +
             (p ? o.status.text : o.working ? '到站作业' : '行驶中') +
             '</span><span class="num">' +
-            (p ? Math.round(o.fill) + '%' : o.kg + ' kg') +
+            (p ? Math.round(o.fill) + '%' : o.kg.toFixed(1) + ' kg') +
             '</span></span>' +
             (p
               ? '<span class="fill-track" style="--point:' +
@@ -191,9 +191,9 @@
       '</h2></div><button class="icon-btn" data-close-detail aria-label="收起详情">' +
       U.icon('close') +
       '</button></div><div class="detail-body"><div class="detail-hero"><span>' +
-      (p ? '当前饱和度' : '累计收运量') +
+      (p ? '最高类别占用' : '累计收运量') +
       '</span><p><b class="big">' +
-      (p ? Math.round(o.fill) : o.kg) +
+      (p ? Math.round(o.fill) : o.kg.toFixed(1)) +
       '</b> ' +
       (p ? '%' : 'kg') +
       '</p><span class="pill ' +
@@ -205,9 +205,28 @@
       ' 次</b></div><div><span>' +
       (p ? '累计重量' : '车辆编号') +
       '</span><b>' +
-      (p ? o.kg + ' kg' : o.code + ' 号车') +
+      (p ? o.kg.toFixed(1) + ' kg' : o.code + ' 号车') +
       '</b></div></div>';
     if (p) {
+      const monitor = H.monitoring(o.id);
+      html +=
+        '<p class="detail-note">' +
+        monitor.bins.map((b) => b.name + ' ' + Math.round(b.fill) + '%').join(' · ') +
+        '</p><p class="detail-note">' +
+        (monitor.priority
+          ? '满载持续超过 15 分钟，优先处置'
+          : monitor.bins.some((b) => b.fill >= 85)
+            ? '分类容器达到 85% 预警阈值'
+            : '分类容器未触发容量预警') +
+        '</p>';
+      html +=
+        '<p class="detail-note">厨余暂存 ' +
+        Math.round(monitor.bins[1].age) +
+        ' 分钟 · ' +
+        (monitor.overdue ? '暂存超时' : '正常') +
+        '</p><a class="button secondary" href="monitor.html?point=' +
+        o.id +
+        '">查看投放与分类容量</a>';
       html +=
         '<p class="detail-note">最近收运：' +
         (o.last == null ? '尚未收运' : H.fmt(o.last)) +
@@ -226,6 +245,7 @@
               '<details class="order-card"><summary>' +
               U.esc((H.ORDERS_TEXT[r.type] || {}).label || r.type) +
               U.status(r) +
+              (r.priority ? '<span class="pill full">优先处置</span>' : '') +
               '</summary>' +
               U.timeline(H.getOrderTimeline(r.id)) +
               '<a class="text-link" href="feedback.html?point=' +
@@ -297,7 +317,7 @@
         borderColor: line,
         textStyle: { color: ink },
         valueFormatter: function (v) {
-          return v + ' kg';
+          return Number(v).toFixed(1) + ' kg';
         },
       },
       grid: { left: 42, right: 12, top: 15, bottom: 26 },
@@ -395,7 +415,9 @@
     document.querySelectorAll('[data-speed]').forEach(function (b) {
       b.setAttribute('aria-pressed', String(+b.dataset.speed === s.playback.speed));
     });
-    $('follow-button').lastElementChild.textContent = s.playback.follow ? '停止跟随' : '跟随车辆';
+    $('follow-button').lastElementChild.textContent = s.playback.follow
+      ? '停止跟随'
+      : '跟随车辆';
     list(s);
     detail(s);
     charts(s);
@@ -412,7 +434,7 @@
             '</time><span>' +
             U.esc(e.station) +
             '</span><b>' +
-            e.kg +
+            e.kg.toFixed(1) +
             ' kg</b></button>'
           );
         })
@@ -428,7 +450,7 @@
           '</td><td>' +
           U.esc(e.truck) +
           '</td><td>' +
-          e.kg +
+          e.kg.toFixed(1) +
           ' kg</td><td><button class="text-button" data-object="' +
           e.pid +
           '" data-object-kind="point">定位</button></td></tr>'
@@ -496,7 +518,11 @@
   };
   $('follow-button').onclick = function () {
     var s = H.getSnapshot(),
-      id = s.playback.follow ? null : selection && selection.kind === 'truck' ? selection.id : 'T2';
+      id = s.playback.follow
+        ? null
+        : selection && selection.kind === 'truck'
+          ? selection.id
+          : 'T2';
     if (id) select({ kind: 'truck', id: id });
     H.setPlayback({ follow: id });
     render(H.getSnapshot());

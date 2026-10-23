@@ -106,7 +106,10 @@ test('feedback merges open overflow order, completes at real collection and surv
   h.saveTime();
   const fresh = boot(l, session);
   assert.equal(fresh.getOrder(o.id).status, 'done');
-  assert.equal(fresh.allFeedback().find((f) => f.id === a.id).text, '桃李园垃圾满溢，请及时收运。');
+  assert.equal(
+    fresh.allFeedback().find((f) => f.id === a.id).text,
+    '桃李园垃圾满溢，请及时收运。',
+  );
 });
 test('generic issues use 18/55 minute demo progress; suggestions and praise create no orders', () => {
   const h = boot();
@@ -143,7 +146,12 @@ test('tour isolation restores time speed selection follow and local data', () =>
   const l = storage(),
     h = boot(l);
   h.addFeedback({ targetId: 'P4', text: '周围垃圾需要及时处理。' });
-  h.setPlayback({ playing: false, speed: 16, selected: { kind: 'truck', id: 'T3' }, follow: 'T3' });
+  h.setPlayback({
+    playing: false,
+    speed: 16,
+    selected: { kind: 'truck', id: 'T3' },
+    follow: 'T3',
+  });
   const before = state(h),
     play = JSON.stringify(h.getSnapshot().playback),
     stored = JSON.stringify(l.data),
@@ -216,7 +224,12 @@ test('independent demo engines preserve populated storage and normal playback', 
     text: '保留这条真实本机提交用于隔离测试。',
   });
   assert(feedback.ok);
-  h.setPlayback({ playing: false, speed: 16, selected: { kind: 'truck', id: 'T2' }, follow: 'T2' });
+  h.setPlayback({
+    playing: false,
+    speed: 16,
+    selected: { kind: 'truck', id: 'T2' },
+    follow: 'T2',
+  });
   h.saveTime();
   const original = JSON.stringify(h.getSnapshot()),
     localBefore = JSON.stringify(local.data),
@@ -238,5 +251,86 @@ test('independent demo engines preserve populated storage and normal playback', 
   assert.equal(JSON.stringify(h.getSnapshot()), original);
   assert.equal(JSON.stringify(local.data), localBefore);
   assert.equal(JSON.stringify(session.data), sessionBefore);
+});
+
+test('inventory volume and mass reconcile at every minute, including partial collections', () => {
+  const h = boot();
+  h.stepTo(360);
+  let partial = false,
+    priority = false,
+    stale = false;
+  for (let t = 360; t <= 1200; t++) {
+    h.stepTo(t);
+    const snap = h.getSnapshot();
+    for (const m of snap.monitoring) {
+      assert(Math.abs(m.initialKg + m.inputKg - m.collectedKg - m.stockKg) < 1e-6);
+      assert(
+        Math.abs(m.initialLiters + m.inputLiters - m.collectedLiters - m.stockLiters) < 1e-6,
+      );
+      assert(m.deposits.every((e) => e.at <= t));
+      assert.equal(m.overdue, m.bins[1].age > 120);
+      assert.equal(
+        m.priority,
+        m.bins.some((b) => b.fullSince !== null && t - b.fullSince >= 15),
+      );
+      if (m.last === t) {
+        assert(m.stockLiters > 0);
+        assert(m.bins.some((b) => b.age > 0));
+        partial = true;
+      }
+      priority ||= m.priority;
+      stale ||= m.overdue;
+    }
+    assert(Math.abs(snap.totalKg - snap.events.reduce((a, e) => a + e.kg, 0)) < 1e-6);
+  }
+  assert(partial && priority && stale);
+  const final = JSON.stringify(h.getSnapshot().monitoring);
+  h.stepTo(480);
+  h.stepTo(1200);
+  assert.equal(JSON.stringify(h.getSnapshot().monitoring), final);
+});
+test('collection and cleaning have independent completion and midday story restores state', () => {
+  const local = storage(),
+    h = boot(local);
+  h.stepTo(750);
+  const stored = JSON.stringify(local.data),
+    before = state(h);
+  h.beginTour();
+  const m = h.tourMilestones(660);
+  assert(m.alert >= 660);
+  h.stepTo(m.done);
+  assert.equal(h.getOrder(m.orderId).status, 'done');
+  const clean = h.ordersOf('P4').find((o) => o.type === 'dirty' && o.at === m.done);
+  assert(clean && clean.status === 'pending');
+  assert.equal(clean.doneAt, m.clean);
+  h.stepTo(m.clean);
+  assert.equal(h.getOrder(clean.id).status, 'done');
+  assert.equal(h.monitoring('P4').lastClean, m.clean);
+  h.endTour();
+  assert.equal(state(h), before);
+  assert.equal(JSON.stringify(local.data), stored);
+});
+test('new feedback categories retain text and suggestions never create collection orders', () => {
+  const h = boot();
+  h.stepTo(600);
+  for (const issueType of ['odor', 'bins', 'location', 'signage']) {
+    const f = h.addFeedback({
+      targetId: 'P4',
+      type: '问题反馈',
+      issueType,
+      text: '该点位需要核查设施与环境问题。',
+    });
+    assert(f.ok);
+    assert.equal(h.getOrder(f.orderId).type, issueType);
+  }
+  assert.equal(
+    h.addFeedback({
+      targetId: 'P4',
+      type: '建议',
+      issueType: 'bins',
+      text: '建议根据调研结果增加分类容器。',
+    }).orderId,
+    null,
+  );
 });
 fs.writeFileSync(root + 'qa/core-results.json', JSON.stringify(results, null, 2));

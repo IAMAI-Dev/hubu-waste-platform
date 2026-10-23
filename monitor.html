@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#193C34" />
+    <title>投放与暂存 · 琴园智清</title>
+    <script>
+      try {
+        if (localStorage.getItem('qy-theme') === 'dark')
+          document.documentElement.dataset.theme = 'dark';
+      } catch (e) {}
+    </script>
+    <link rel="icon" href="favicon.svg?v=8a317446c971" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css?v=a3d6854d25b3" />
+    <link rel="stylesheet" href="motion.css?v=84c8438233ba" />
+    <link rel="stylesheet" href="monitor.css?v=efe26f78b4e2" />
+  </head>
+  <body>
+    <header id="site-header" class="site-header"></header>
+    <main class="monitor-main">
+      <div class="eyebrow">全过程管理 / 投放 · 暂存 · 转运</div>
+      <h1>看见每一次投放，及时回应每一处积压。</h1>
+      <div class="monitor-controls">
+        <select id="point" aria-label="投放点"></select
+        ><button id="play" class="button primary">播放</button
+        ><input id="time" aria-label="模拟时刻" type="range" min="360" max="1200" /><b
+          id="clock"
+        ></b
+        ><select id="speed" aria-label="播放倍率">
+          <option value="1">1×</option>
+          <option value="4">4×</option>
+          <option value="16">16×</option></select
+        ><small>06:00—20:00 · 1× 每秒 10 模拟分钟</small>
+      </div>
+      <div id="monitor-kpis" class="monitor-kpis"></div>
+      <div class="monitor-overview">
+        <section class="monitor-panel campus-panel">
+          <div class="eyebrow">CAMPUS / 点位联动</div>
+          <h2>六个点位，一条管理链。</h2>
+          <div id="monitor-campus"></div>
+        </section>
+        <section class="monitor-panel observation-panel">
+          <div class="eyebrow">OBSERVATION / 监测场景</div>
+          <h2 id="point-name"></h2>
+          <p id="point-context"></p>
+          <div id="monitor-bins" class="monitor-grid"></div>
+          <div id="deposit-signal" role="status"></div>
+          <a id="dispatch-link" class="text-link">查看位置与清运安排</a>
+        </section>
+      </div>
+      <nav class="monitor-tabs" aria-label="点位管理内容">
+        <button class="button secondary" data-tab="投放监测">投放监测</button
+        ><button class="button secondary" data-tab="暂存与环境">暂存与环境</button
+        ><button class="button secondary" data-tab="治理建议">治理建议</button>
+      </nav>
+      <div id="monitor-content"></div>
+      <section class="monitor-panel monitor-story">
+        <div class="eyebrow">校园治理纪事</div>
+        <h2>桃李园的午间处置</h2>
+        <p>从午间投放，到分类暂存、车辆收运与独立保洁，查看同一条事件链。</p>
+        <button class="button primary" id="story-start">开始独立演示</button>
+        <div id="story-body" hidden></div>
+      </section>
+    </main>
+
+    <script src="routes.js?v=01b4f05b4144"></script>
+    <script src="seed-data.js?v=0e74605f0618"></script>
+    <script src="core.js?v=992e7417871e"></script>
+    <script src="ui.js?v=def1d3fc74d8"></script>
+    <script src="motion.js?v=1728aacd6a36"></script>
+    <script src="campus-model.js?v=f81291b19b6f"></script>
+    <script src="scene.js?v=e71ef8ccc8b4"></script>
+    <script src="monitor.js?v=0992afc46dc0"></script>
+  </body>
+</html>
