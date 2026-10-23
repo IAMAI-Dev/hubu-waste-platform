@@ -1410,3 +1410,237 @@
   width: 20px;
   height: 20px;
 }
+/* Architectural campus model: ivory masonry, jade glazing and terracotta athletics. */
+.cinema-campus {
+  --model-stone: #e9e9d9;
+  --model-front: #bbc6b1;
+  --model-side: #97ae9b;
+  --model-glass: #658c85;
+  --model-paving: #dce0cc;
+  --model-lawn: #b6cba3;
+  --model-track: #b77c65;
+  --model-line: #f6f2de;
+  --model-green: #729c70;
+}
+.model-plaza,
+.sports-apron {
+  fill: var(--model-paving);
+  stroke: #a2b59b;
+  stroke-width: 0.7;
+}
+.model-lawn {
+  fill: var(--model-lawn);
+  stroke: #a8bc96;
+  stroke-width: 0.8;
+}
+.model-shadow {
+  fill: #274436;
+  opacity: 0.13;
+}
+.model-roof {
+  fill: var(--model-stone);
+  stroke: #f3f3dd;
+  stroke-width: 0.75;
+  stroke-linejoin: round;
+}
+.model-wall.front {
+  fill: var(--model-front);
+}
+.model-wall.side {
+  fill: var(--model-side);
+}
+.model-parapet {
+  fill: none;
+  stroke: #a6b49d;
+  stroke-width: 0.6;
+}
+.model-glazing {
+  fill: var(--model-glass);
+}
+.side-glazing {
+  opacity: 0.7;
+}
+.model-mullion {
+  stroke: var(--model-front);
+  stroke-width: 1;
+  fill: none;
+}
+.material-glass .model-roof {
+  fill: #92b5a8;
+}
+.material-glass .model-wall {
+  fill: #739b91;
+}
+.material-residence .model-roof {
+  fill: #dad8c2;
+}
+.material-dining .model-roof {
+  fill: #e6dbc1;
+}
+.material-conference .model-roof {
+  fill: #b7c9c0;
+}
+.material-stand .model-roof {
+  fill: #e5d9b8;
+}
+.material-stand .model-parapet {
+  stroke: none;
+}
+.roof-panel {
+  fill: #668d8c;
+  stroke: #adbdac;
+  stroke-width: 0.5;
+}
+.library-skylight {
+  fill: #d6e6d8;
+  stroke: #728f81;
+  stroke-width: 0.6;
+}
+.hall-roof-rib {
+  stroke: #eaf0e2;
+  stroke-width: 1.6;
+  fill: none;
+}
+.dining-awning {
+  fill: #b6aa7e;
+  stroke: #e3d9b8;
+  stroke-width: 0.6;
+}
+.model-seat {
+  fill: #9a9f7a;
+}
+.model-step {
+  fill: none;
+  stroke: #a9b59c;
+  stroke-width: 1;
+}
+.model-walk {
+  fill: none;
+  stroke: #e8e5d2;
+  stroke-width: 4;
+}
+.garden-path {
+  fill: none;
+  stroke: #e3dfc8;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tree-shadow {
+  fill: #36543d;
+  opacity: 0.16;
+}
+.tree-trunk {
+  fill: none;
+  stroke: #8c9471;
+  stroke-width: 1.5;
+}
+.tree-crown {
+  fill: var(--model-green);
+  stroke: #699066;
+  stroke-width: 0.4;
+}
+.tree-light {
+  fill: #a3bd86;
+  opacity: 0.6;
+}
+.sports-track {
+  fill: var(--model-track);
+}
+.track-lane {
+  fill: none;
+  stroke: #ecd0b1;
+  stroke-width: 0.6;
+  opacity: 0.85;
+}
+.sports-infield {
+  fill: #819e6f;
+}
+.football-pitch {
+  fill: #6b966c;
+}
+.pitch-stripe {
+  fill: #8daf7a;
+  opacity: 0.5;
+}
+.field-line,
+.goal-frame {
+  fill: none;
+  stroke: var(--model-line);
+  stroke-width: 0.85;
+}
+.goal-frame {
+  stroke-width: 1.6;
+}
+.scene-road {
+  stroke: #f4eedb;
+  stroke-width: 10;
+  opacity: 0.9;
+}
+.terrain-top {
+  fill: #c8d6bc;
+}
+.terrain-contour {
+  opacity: 0.07;
+}
+.scene-point .point-beacon:before {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 24px;
+  top: 30px;
+  background: var(--point);
+  opacity: 0.5;
+}
+.scene-point .scene-label {
+  position: relative;
+}
+.scene-point .point-beacon i {
+  width: 10px;
+  height: 10px;
+}
+.scene-markers .scene-point:not(.selected) .capacity-track {
+  opacity: 0.08;
+}
+[data-theme='dark'] .cinema-campus,
+.night-scene .cinema-campus {
+  --model-stone: #8c9f88;
+  --model-front: #546e58;
+  --model-side: #395544;
+  --model-glass: #a0beb0;
+  --model-paving: #3f5844;
+  --model-lawn: #34573c;
+  --model-track: #895f4c;
+  --model-line: #d9dcc0;
+  --model-green: #496e4b;
+}
+[data-theme='dark'] .terrain-top,
+.night-scene .terrain-top {
+  fill: var(--terrain-top);
+}
+[data-theme='dark'] .model-roof,
+.night-scene .model-roof {
+  stroke: #abb8a0;
+}
+.night-scene .scene-road,
+[data-theme='dark'] .scene-road {
+  stroke: #7d8d6e;
+  opacity: 0.7;
+}
+.night-scene .material-residence .model-roof,
+[data-theme='dark'] .material-residence .model-roof {
+  fill: #8a9479;
+}
+.night-scene .material-dining .model-roof,
+[data-theme='dark'] .material-dining .model-roof {
+  fill: #a19978;
+}
+.night-scene .garden-path,
+[data-theme='dark'] .garden-path {
+  stroke: #7c8a66;
+}
+@media (max-width: 767px) {
+  .scene-point .point-beacon:before {
+    height: 15px;
+  }
+}

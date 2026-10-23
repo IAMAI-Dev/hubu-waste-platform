@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "width": 1500,
+      "theme": "light",
+      "landmarks": 6,
+      "passed": true
+    },
+    {
+      "width": 1500,
+      "theme": "dark",
+      "landmarks": 6,
+      "passed": true
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "landmarks": 6,
+      "passed": true
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "landmarks": 6,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "landmarks": 6,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "landmarks": 6,
+      "passed": true
+    }
+  ],
+  "storyIsolation": true,
+  "errors": [],
+  "followFrameSample": {
+    "frames": 120,
+    "p95": 16.90000000000009
+  }
+}

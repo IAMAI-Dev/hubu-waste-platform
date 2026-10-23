@@ -34,27 +34,6 @@
       target = { ...camera, zoom: 1 };
     const points = H.POINTS.map((p) => ({ ...p, world: world(p.pos) })),
       paths = H.TRUCKS.map((t) => ({ id: t.id, color: t.color, points: t.path.map(world) }));
-    const buildings = [];
-    points.forEach((p, i) => {
-      const shapes =
-        i === 4
-          ? [[0, 4, 62, 39, 8]]
-          : [
-              [0, 0, 40 + (i % 2) * 8, 26, 18 + i * 3],
-              [-43, 22, 27, 18, 13],
-              [28, -39, 23, 18, 12 + i * 2],
-            ];
-      shapes.forEach((b, j) =>
-        buildings.push({
-          x: p.world[0] + b[0],
-          y: p.world[1] + b[1],
-          w: b[2],
-          d: b[3],
-          h: b[4],
-          index: i * 3 + j,
-        }),
-      );
-    });
     el.classList.add('cinema-campus');
     el.classList.remove('has-real-map');
     el.innerHTML = `<svg class="campus-svg scene-svg" role="group" aria-label="湖北大学立体校园示意"><defs><linearGradient id="${uid}-side" x2="0" y2="1"><stop stop-color="var(--terrain-edge)"/><stop offset="1" stop-color="var(--terrain-bottom)"/></linearGradient></defs><g class="terrain-contours"></g><path class="terrain-shadow"/><path class="terrain-side" fill="url(#${uid}-side)"/><path class="terrain-top"/><g class="scene-groves"></g><g class="scene-roads"></g><g class="scene-buildings"></g><g class="scene-routes"></g><g class="scene-traces"></g><g class="scene-signals"></g><path class="scene-connector"/></svg><div class="scene-markers"></div><div class="scene-coordinate-label" aria-hidden="true">HUBU / CAMPUS IN MOTION<span>114.3332 E · 30.5774 N</span></div><div class="scene-caption"><span>${U.icon('layers')}校园示意</span><small>预设路线 · 模拟演示</small></div>${options.hero ? '' : `<div class="map-tools"><button class="icon-btn" data-scene-action="fit" aria-label="重置地图视角">${U.icon('target')}</button><button class="icon-btn" data-scene-action="in" aria-label="放大地图">${U.icon('plus')}</button><button class="icon-btn" data-scene-action="out" aria-label="缩小地图">${U.icon('minus')}</button></div>`}`;
@@ -69,18 +48,7 @@
     const contours = Array.from({ length: 4 }, () =>
       node('path', 'terrain-contour', svg.querySelector('.terrain-contours')),
     );
-    const groves = Array.from({ length: 36 }, (_, i) => ({
-      world: [-290 + H.pseudo(i + 31) * 580, -260 + H.pseudo(i + 45) * 510],
-      r: 5 + H.pseudo(i + 17) * 4,
-      node: node('ellipse', 'scene-tree', svg.querySelector('.scene-groves')),
-    }));
-    const faces = buildings.map((b) => ({
-      b,
-      side: node('path', 'building-side', svg.querySelector('.scene-buildings')),
-      front: node('path', 'building-front', svg.querySelector('.scene-buildings')),
-      roof: node('path', 'building-roof', svg.querySelector('.scene-buildings')),
-      line: node('path', 'building-line', svg.querySelector('.scene-buildings')),
-    }));
+    const campusModel = HUBU_CAMPUS_MODEL.create(svg, points, paths, H.CAMPUS.map(world));
     const routeNodes = paths.map((p) => {
       const road = node('path', 'scene-road', svg.querySelector('.scene-roads')),
         route = node('path', 'scene-route', svg.querySelector('.scene-routes')),
@@ -156,36 +124,7 @@
           ),
         ),
       );
-      groves.forEach((g) => {
-        const p = project(g.world, 8);
-        g.node.setAttribute('cx', p[0]);
-        g.node.setAttribute('cy', p[1]);
-        g.node.setAttribute('rx', g.r * Math.min(width / 850, height / 840) * camera.zoom);
-        g.node.setAttribute('ry', g.r * 0.72 * Math.min(width / 850, height / 840) * camera.zoom);
-      });
-      faces.forEach(({ b, side, front, roof, line }) => {
-        const rise = options.hero ? entrance : Math.min(1, entrance * 1.6 - b.index * 0.016),
-          z = b.h * Math.max(0.04, rise),
-          a = [b.x - b.w / 2, b.y - b.d / 2],
-          c = [b.x + b.w / 2, b.y + b.d / 2],
-          corners = [a, [c[0], a[1]], c, [a[0], c[1]]],
-          bottom = corners.map((p) => project(p)),
-          top = corners.map((p) => project(p, z));
-        const poly = (ps) => 'M' + ps.map((p) => p.join(' ')).join('L') + 'Z';
-        side.setAttribute('d', poly([bottom[1], bottom[2], top[2], top[1]]));
-        front.setAttribute('d', poly([bottom[2], bottom[3], top[3], top[2]]));
-        roof.setAttribute('d', poly(top));
-        line.setAttribute(
-          'd',
-          path(
-            [
-              [a[0] + 5, b.y],
-              [c[0] - 5, b.y],
-            ],
-            z + 1,
-          ),
-        );
-      });
+      campusModel.paint(project, entrance);
       routeNodes.forEach((r) => {
         const d = path(r.p.points, 2);
         r.road.setAttribute('d', d);
@@ -322,11 +261,15 @@
         }
       }
       const f = M.reduced() ? 1 : 1 - Math.exp(-dt * 6);
-      Object.keys(camera).forEach((k) => (camera[k] = M.lerp(camera[k], target[k], f)));
+      Object.keys(camera).forEach(
+        (k) =>
+          (camera[k] =
+            Math.abs(camera[k] - target[k]) < 0.001 ? target[k] : M.lerp(camera[k], target[k], f)),
+      );
       geometry();
       s.points.forEach((p) => {
         const b = markers[p.id],
-          q = project(world(p.pos), 20);
+          q = project(world(p.pos), 65);
         b.style.left = q[0] + 'px';
         b.style.top = q[1] + 'px';
         b.style.setProperty('--point', p.status.color);
