@@ -11,8 +11,9 @@ try {
 }
 const { chromium } = pw;
 const root =
-    (process.env.HUBU_ROOT || require('path').resolve(__dirname, '..')).replace(/\\/g, '/') + '/',
-  base = 'http://127.0.0.1:8765/';
+    (process.env.HUBU_ROOT || require('path').resolve(__dirname, '..')).replace(/\\/g, '/') +
+    '/',
+  base = process.env.HUBU_BASE || 'http://127.0.0.1:8765/';
 const results = [],
   errors = [];
 function pass(name, data = {}) {
@@ -81,16 +82,17 @@ function pass(name, data = {}) {
     assert((await page.locator('#object-detail').innerText()).includes('桃李园'));
     await page.waitForTimeout(300);
     await page.screenshot({ path: root + 'qa/detail-mobile-point.png', fullPage: true });
-    await page.getByRole('button', { name: '收起详情' }).click();
+    await page.locator('[data-close-detail]:visible').click();
     await page.getByRole('button', { name: '车辆', exact: true }).click();
     await page.locator('#object-list [data-object="T2"]').click();
+    await page.locator('[data-sheet-toggle]:visible').click();
     await page.getByRole('button', { name: '跟随这辆车', exact: true }).click();
     assert.equal(await page.evaluate(() => HUBU.getSnapshot().playback.follow), 'T2');
-    await page.getByRole('button', { name: '收起详情' }).click();
+    await page.locator('[data-close-detail]:visible').click();
     const map = await page.locator('.campus-svg').boundingBox();
-    await page.mouse.move(map.x + 25, map.y + 350);
+    await page.mouse.move(map.x + 25, map.y + map.height / 2);
     await page.mouse.down();
-    await page.mouse.move(map.x + 75, map.y + 380, { steps: 5 });
+    await page.mouse.move(map.x + 75, map.y + map.height / 2 + 30, { steps: 5 });
     await page.mouse.up();
     assert.equal(await page.evaluate(() => HUBU.getSnapshot().playback.follow), null);
     pass('mobile points, vehicles, details, follow and drag exit');
@@ -105,7 +107,7 @@ function pass(name, data = {}) {
     await page.getByRole('button', { name: '定位', exact: true }).first().click();
     assert.equal(await page.locator('.workspace').getAttribute('data-view'), 'map');
     pass('mobile timeline, speed, charts and record-to-map selection');
-    await page.getByRole('button', { name: '收起详情' }).click();
+    await page.locator('[data-close-detail]:visible').click();
     const before = await page.evaluate(() => ({
       time: HUBU.getNow(),
       play: HUBU.getSnapshot().playback,
@@ -147,6 +149,7 @@ function pass(name, data = {}) {
     assert((await page.locator('.feedback-card.mine').count()) === 1);
     await page.screenshot({ path: root + 'qa/feedback-mobile-progress.png', fullPage: true });
     await page.goto(base + 'detail.html?point=P4');
+    await page.locator('[data-sheet-toggle]:visible').click();
     assert((await page.locator('#object-detail').innerText()).includes('周边脏乱'));
     assert.equal(await page.evaluate(() => HUBU.getNow()), 600);
     pass('feedback submit, linked order, reload and cross-page progress');
@@ -177,7 +180,7 @@ function pass(name, data = {}) {
     await page.locator('[data-point=P4]').focus();
     await page.keyboard.press('Enter');
     assert(await page.locator('#object-detail').isVisible());
-    await page.getByRole('button', { name: '收起详情' }).click();
+    await page.locator('[data-close-detail]:visible').click();
     await page.getByRole('button', { name: '展开时间轴' }).click();
     await page.locator('#time-slider').focus();
     await page.keyboard.press('ArrowRight');

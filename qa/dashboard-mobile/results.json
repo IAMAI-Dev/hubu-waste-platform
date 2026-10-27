@@ -1,0 +1,129 @@
+{
+  "results": [
+    {
+      "name": "truck summary, details and tools 320x568 light",
+      "passed": true,
+      "mapHeight": 130,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 320x568 dark",
+      "passed": true,
+      "mapHeight": 130,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 360x560 light",
+      "passed": true,
+      "mapHeight": 170,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 360x560 dark",
+      "passed": true,
+      "mapHeight": 170,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 390x560 light",
+      "passed": true,
+      "mapHeight": 170,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 390x560 dark",
+      "passed": true,
+      "mapHeight": 170,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 390x640 light",
+      "passed": true,
+      "mapHeight": 250,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 390x640 dark",
+      "passed": true,
+      "mapHeight": 250,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 390x700 light",
+      "passed": true,
+      "mapHeight": 310,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 390x700 dark",
+      "passed": true,
+      "mapHeight": 310,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 390x844 light",
+      "passed": true,
+      "mapHeight": 390,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 390x844 dark",
+      "passed": true,
+      "mapHeight": 390,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 430x932 light",
+      "passed": true,
+      "mapHeight": 478,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 430x932 dark",
+      "passed": true,
+      "mapHeight": 478,
+      "cardHeight": 78
+    },
+    {
+      "name": "truck summary, details and tools 667x375 light",
+      "passed": true,
+      "mapHeight": 137,
+      "cardHeight": 64.00001525878906
+    },
+    {
+      "name": "truck summary, details and tools 667x375 dark",
+      "passed": true,
+      "mapHeight": 137,
+      "cardHeight": 64
+    },
+    {
+      "name": "truck summary, details and tools 844x390 light",
+      "passed": true,
+      "mapHeight": 152,
+      "cardHeight": 64
+    },
+    {
+      "name": "truck summary, details and tools 844x390 dark",
+      "passed": true,
+      "mapHeight": 152,
+      "cardHeight": 64
+    },
+    {
+      "name": "selected point survives charts and returns as complete summary",
+      "passed": true
+    },
+    {
+      "name": "compact toolbar retains tour controls",
+      "passed": true
+    },
+    {
+      "name": "online AMap survives resized selection space",
+      "passed": true
+    },
+    {
+      "name": "desktop controls restore after orientation and breakpoint changes",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

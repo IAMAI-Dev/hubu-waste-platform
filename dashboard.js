@@ -25,6 +25,44 @@
       H.setPlayback({ follow: null });
     },
   };
+  const compactScreen = matchMedia(
+    '(max-width:767px), (min-width:568px) and (max-height:500px) and (max-width:1023px)',
+  );
+  const heading = document.querySelector('.dashboard-heading'),
+    toolbar = document.querySelector('.map-topline'),
+    quickActions = document.createElement('div');
+  quickActions.className = 'map-quick-actions';
+  toolbar.append(quickActions);
+  $('start-tour').setAttribute('aria-label', '观看清运故事');
+  $('start-tour').title = '观看清运故事';
+  $('follow-button').setAttribute('aria-label', '跟随车辆');
+  const brandTitle = document.querySelector('.brand b'),
+    brandCaption = document.querySelector('.brand small'),
+    originalBrand = [brandTitle.textContent, brandCaption.textContent];
+  function compactLayout() {
+    document.body.classList.toggle('compact-dashboard', compactScreen.matches);
+    if (compactScreen.matches) {
+      quickActions.append($('follow-button'), $('start-tour'), $('toggle-panels'));
+      brandTitle.textContent = '清运看板';
+      brandCaption.textContent = '琴园智清 · 湖北大学';
+    } else {
+      toolbar.insertBefore($('follow-button'), quickActions);
+      heading.append($('toggle-panels'), $('start-tour'));
+      brandTitle.textContent = originalBrand[0];
+      brandCaption.textContent = originalBrand[1];
+    }
+    requestAnimationFrame(() => dispatchEvent(new Event('resize')));
+  }
+  compactScreen.addEventListener('change', compactLayout);
+  compactLayout();
+  function setSheetExpanded(value) {
+    sheetExpanded = value;
+    document.body.classList.toggle('details-open', value);
+    document.querySelector('.insight-panel').classList.toggle('sheet-expanded', value);
+    document.querySelector('.workspace').classList.toggle('sheet-open', value);
+    document.querySelector('.insight-panel').scrollTop = 0;
+    requestAnimationFrame(() => dispatchEvent(new Event('resize')));
+  }
   function switchMap(mode) {
     if (renderer) renderer.destroy();
     renderer = (mode === 'geo' ? HUBU_MAP : HUBU_SCENE).create($('dashboard-map'), mapOptions);
@@ -55,6 +93,10 @@
   });
   $('toggle-panels').onclick = function () {
     var hidden = document.querySelector('.dashboard-main').classList.toggle('scene-only');
+    document.body.classList.toggle(
+      'has-object',
+      !!selection && !hidden && document.querySelector('.workspace').dataset.view === 'map',
+    );
     this.setAttribute('aria-pressed', String(hidden));
     this.setAttribute('aria-label', hidden ? '展开面板' : '收起面板');
     this.querySelector('span:last-child').textContent = hidden ? '展开面板' : '收起面板';
@@ -80,6 +122,16 @@
       if (b.tagName === 'BUTTON') b.setAttribute('aria-pressed', String(b.dataset.view === v));
     });
     $('records-panel').hidden = v !== 'records';
+    document.body.classList.toggle(
+      'has-object',
+      !!selection &&
+        v === 'map' &&
+        !document.querySelector('.dashboard-main').classList.contains('scene-only'),
+    );
+    if (v === 'map') {
+      $('insight-summary').hidden = !!selection;
+      $('object-detail').hidden = !selection;
+    } else setSheetExpanded(false);
     if (v === 'points' || v === 'trucks') setKind(v);
     if (v === 'charts') {
       $('insight-summary').hidden = false;
@@ -100,9 +152,7 @@
   }
   function select(s, move) {
     if (!s || !selection || s.id !== selection.id || s.kind !== selection.kind) {
-      sheetExpanded = false;
-      document.querySelector('.insight-panel').classList.remove('sheet-expanded');
-      document.querySelector('.insight-panel').scrollTop = 0;
+      setSheetExpanded(false);
     }
     selection = s;
     H.setPlayback({ selected: s });
@@ -112,10 +162,14 @@
     $('object-detail').hidden = !s;
     lastDetail = '';
     if (s) view('map');
+    else document.body.classList.remove('has-object');
     M.animate(
       $('object-detail'),
       [
-        { opacity: 0, transform: 'translateX(22px)' },
+        {
+          opacity: 0,
+          transform: compactScreen.matches ? 'translateY(12px)' : 'translateX(22px)',
+        },
         { opacity: 1, transform: 'none' },
       ],
       { duration: 380 },
@@ -189,7 +243,33 @@
         return x.id === selection.id;
       });
     if (!o) return;
+    const peekState = p ? o.status.text : o.working ? '到站作业' : '行驶中';
+    const peekMeta = p
+      ? '最高类别 ' + Math.round(o.fill) + '% · ' + o.times + ' 次收运'
+      : '已收运 ' + o.kg.toFixed(1) + ' kg · 下站 ' + o.next.name;
+    const peekName = p ? o.name : o.code + ' 号车 · ' + o.name;
+    const peek =
+      '<div class="selection-peek" role="group" aria-label="已选对象摘要"><button class="peek-main" data-sheet-toggle aria-expanded="' +
+      sheetExpanded +
+      '" aria-label="展开' +
+      U.esc(peekName) +
+      '详情，' +
+      U.esc(peekMeta) +
+      '"><span class="peek-icon" style="--peek-color:' +
+      (p ? o.status.color : o.color) +
+      '">' +
+      U.icon(p ? 'pin' : 'truck') +
+      '</span><span class="peek-copy"><strong>' +
+      U.esc(peekName) +
+      '</strong><span>' +
+      U.esc(peekState + ' · ' + peekMeta) +
+      '</span></span>' +
+      U.icon('chevronUp') +
+      '</button><button class="icon-btn" data-close-detail aria-label="收起详情">' +
+      U.icon('close') +
+      '</button></div>';
     var html =
+      peek +
       '<div class="detail-header"><div><span class="eyebrow">' +
       (p ? '校园投放点' : '清运车辆') +
       '</span><h2>' +
@@ -301,8 +381,8 @@
           d.open = !!open[i];
         });
       if (focusAttr)
-        $('object-detail')
-          .querySelector('[' + focusAttr + ']')
+        Array.from($('object-detail').querySelectorAll('[' + focusAttr + ']'))
+          .find((el) => el.getClientRects().length)
           ?.focus({ preventScroll: true });
       lastDetail = html;
     }
@@ -435,6 +515,11 @@
     document.querySelectorAll('[data-speed]').forEach(function (b) {
       b.setAttribute('aria-pressed', String(+b.dataset.speed === s.playback.speed));
     });
+    $('follow-button').setAttribute('aria-pressed', String(!!s.playback.follow));
+    $('follow-button').setAttribute(
+      'aria-label',
+      s.playback.follow ? '停止跟随车辆' : '跟随车辆',
+    );
     $('follow-button').lastElementChild.textContent = s.playback.follow
       ? '停止跟随'
       : '跟随车辆';
@@ -487,13 +572,12 @@
     if (b.dataset.object) select({ kind: b.dataset.objectKind, id: b.dataset.object });
     if (b.hasAttribute('data-close-detail')) select(null, false);
     if (b.hasAttribute('data-sheet-toggle')) {
-      sheetExpanded = !sheetExpanded;
-      document
-        .querySelector('.insight-panel')
-        .classList.toggle('sheet-expanded', sheetExpanded);
+      setSheetExpanded(!sheetExpanded);
       lastDetail = '';
       render(H.getSnapshot());
-      $('object-detail').querySelector('[data-sheet-toggle]')?.focus({ preventScroll: true });
+      Array.from($('object-detail').querySelectorAll('[data-sheet-toggle]'))
+        .find((el) => el.getClientRects().length)
+        ?.focus({ preventScroll: true });
     }
     if (b.dataset.follow) {
       H.setPlayback({

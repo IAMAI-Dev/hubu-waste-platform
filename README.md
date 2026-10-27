@@ -50,6 +50,7 @@ monitor.js / monitor.css 分类监测、暂存环境、治理规则及独立六�
 feedback.js             表单、可选评分、筛选、时间线与清除确认
 style.css               设计变量、深浅主题、响应式组件、动效
 mobile.css              手机竖横屏、动态视口、触摸详情与表单布局
+dashboard-mobile.css    看板紧凑工具栏、完整摘要与展开详情
 libs/echarts.min.js     本地 ECharts 5.5.1，保留原版权声明
 tests/                  模拟回归与浏览器交互检查
 qa/                     验收截图、检查结果及已知验证边界
@@ -91,6 +92,8 @@ qa/                     验收截图、检查结果及已知验证边界
 
 手机看板采用独立的指标、视图、地图和回放分区，可单指移动校园场景、双指缩放；点位详情支持展开与收起。投放页先显示分类容器，校园位置按需展开，提供按小时回放入口。反馈表单适配软键盘、安全区域和底部导航；减少动态效果时保留静态故事和完整操作。
 
+看板选中对象后先显示完整摘要卡，点按展开详情；短屏优先保留地图，跟随、故事和专注模式合并在地图工具栏。[看板专项验收与截图](qa/dashboard-mobile/README.md)。
+
 [手机专项验收与截图](qa/mobile/README.md)。运行 `python preview.py 8766` 后，可用 `npm run test:mobile` 重现专项验收。
 
 ## 本机存储
@@ -130,7 +133,7 @@ npm run test:cinematic
 
 ## Git 协作
 
-本目录是独立 Git 仓库，主分支 `main`。地图本机配置、依赖目录和日志已忽略；页面、业务逻辑、测试和验收材料纳入版本控制。相邻 `group work1` 不属于本仓库。
+本目录是独立 Git 仓库，主分支 `main`。依赖目录和日志已忽略；页面、业务逻辑、演示地图配置、测试和验收材料纳入版本控制。相邻 `group work1` 不属于本仓库。
 
 ```powershell
 git status
@@ -141,7 +144,7 @@ git commit -m "描述这次修改"
 git log --oneline
 ```
 
-当前仅使用本地版本控制。需要多人同步时，再由小组确定远程仓库地址和托管平台。
+远程仓库为 [IAMAI-Dev/hubu-waste-platform](https://github.com/IAMAI-Dev/hubu-waste-platform)，`main` 分支通过 GitHub Pages 发布：[在线访问](https://iamai-dev.github.io/hubu-waste-platform/)。
 
 2026-10-23 校园模型重绘：[设计说明与验收截图](qa/campus-model/README.md)。模型位置沿用现有点位，建筑细节按功能示意设计。
 
@@ -150,6 +153,6 @@ git log --oneline
 
 使用 `python preview.py 8765` 启动本地预览。该服务固定从当前项目目录提供资源，返回 `Cache-Control: no-store`，并禁止 Windows 同端口重复监听。若端口已被占用，先关闭旧预览进程。
 
-三个页面的公共脚本、样式及图标带内容指纹。修改静态资源后运行 `python tools/version_assets.py` 更新引用；页面仍无需构建。该命令不修改本机地图配置。旧标签页可通过带查询参数的页面地址重新进入，例如 `http://127.0.0.1:8765/detail.html?v=campus-model-20261023`。
+四个页面的公共脚本、样式及图标带内容指纹。修改静态资源后运行 `python tools/version_assets.py` 更新引用；页面仍无需构建。该命令不修改本机地图配置。旧标签页可通过带查询参数的页面地址重新进入，例如 `http://127.0.0.1:8765/detail.html?v=campus-model-20261023`。
 
 2026-10-23 缓存修复验证：模拟上一版 scene.js 被浏览器缓存后，普通刷新能加载版本化资源并显示六组新模型；预览响应不受旧条件请求影响。检查源码为 `tests/cache.test.cjs`，结果见 `qa/cache/results.json`。

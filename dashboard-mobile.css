@@ -1,0 +1,632 @@
+/* Dashboard on handheld browsers: one header, a usable map, a complete compact selection. */
+.selection-peek {
+  display: none;
+}
+.map-quick-actions {
+  display: contents;
+}
+@media (max-width: 767px), (min-width: 568px) and (max-height: 500px) and (max-width: 1023px) {
+  .dashboard-page.compact-dashboard {
+    --mobile-header: calc(52px + env(safe-area-inset-top));
+    --selection-peek-height: 80px;
+  }
+  .compact-dashboard .site-header {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  .compact-dashboard .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+  }
+  .compact-dashboard .brand {
+    gap: 8px;
+  }
+  .compact-dashboard .brand b {
+    font-size: 18px;
+  }
+  .compact-dashboard .brand small {
+    font-size: 12px;
+  }
+  .compact-dashboard .header-tools .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+  .dashboard-page.compact-dashboard .dashboard-main,
+  .dashboard-page.compact-dashboard .dashboard-main:has(.has-selection) {
+    grid-template-rows: 58px 46px minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 8px max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left));
+    min-height: 0;
+  }
+  .compact-dashboard .dashboard-heading {
+    position: absolute !important;
+    inset: auto !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    margin: -1px;
+    pointer-events: none;
+  }
+  .compact-dashboard .metrics {
+    grid-row: 1;
+  }
+  .compact-dashboard .metrics > div {
+    padding: 7px 8px;
+  }
+  .compact-dashboard .metrics > div > span:first-child {
+    font-size: 12px;
+  }
+  .compact-dashboard .metrics p {
+    margin-top: 4px;
+  }
+  .compact-dashboard .metrics b {
+    font-size: 21px;
+  }
+  .compact-dashboard .metrics small {
+    font-size: 12px;
+  }
+  .compact-dashboard .workspace-tabs {
+    grid-row: 2;
+    border-radius: 9px;
+  }
+  .compact-dashboard .workspace-tabs button {
+    min-height: 44px;
+    font-size: 12px;
+    padding: 5px 3px;
+  }
+  .compact-dashboard .workspace {
+    grid-row: 3;
+    border-radius: 14px;
+    min-height: 0;
+  }
+  .compact-dashboard .map-panel {
+    height: auto;
+    border-radius: 14px;
+    bottom: 0;
+  }
+  .compact-dashboard .workspace.has-selection[data-view='map']:not(.sheet-open) .map-panel {
+    bottom: calc(var(--selection-peek-height) + 6px);
+  }
+  .compact-dashboard .map-topline,
+  .compact-dashboard .workspace.has-selection .map-topline {
+    height: 50px;
+    min-height: 50px;
+    gap: 4px;
+    padding: 3px 5px;
+    display: flex;
+    align-items: center;
+  }
+  .compact-dashboard .basemap-switch {
+    min-width: 0;
+    flex: 1;
+    max-width: 210px;
+    display: flex;
+  }
+  .compact-dashboard .basemap-switch button {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 7px;
+    min-height: 44px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .compact-dashboard .map-quick-actions {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex: none;
+  }
+  .compact-dashboard .map-quick-actions .button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    padding: 3px !important;
+    font-size: 0 !important;
+    border: 0 !important;
+    border-radius: 8px;
+    background: transparent !important;
+    color: var(--muted);
+  }
+  .compact-dashboard .map-quick-actions .button > .icon,
+  .compact-dashboard .map-quick-actions .button > span:first-child > .icon {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .compact-dashboard #follow-button > span:last-child,
+  .compact-dashboard #toggle-panels > span:last-child {
+    display: none !important;
+  }
+  .compact-dashboard .map-quick-actions .button::after {
+    font-size: 12px;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+  .compact-dashboard #start-tour::after {
+    content: '故事';
+  }
+  .compact-dashboard #follow-button::after {
+    content: '跟随';
+  }
+  .compact-dashboard #follow-button[aria-pressed='true']::after {
+    content: '停止';
+  }
+  .compact-dashboard #toggle-panels::after {
+    content: '专注';
+  }
+  .compact-dashboard #toggle-panels[aria-pressed='true']::after {
+    content: '还原';
+  }
+  .compact-dashboard .map-quick-actions .button[aria-pressed='true'] {
+    background: var(--accent-soft) !important;
+    color: var(--accent);
+  }
+  .compact-dashboard .workspace.has-selection[data-view='map'] .insight-panel {
+    height: var(--selection-peek-height);
+    max-height: none;
+    min-height: 0;
+    inset: auto 0 0;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: none;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    animation: none;
+  }
+  .compact-dashboard
+    .workspace.has-selection[data-view='map']
+    .insight-panel:not(.sheet-expanded)
+    .detail-header,
+  .compact-dashboard
+    .workspace.has-selection[data-view='map']
+    .insight-panel:not(.sheet-expanded)
+    .detail-body {
+    display: none;
+  }
+  .compact-dashboard .selection-peek {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    height: calc(var(--selection-peek-height) - 2px);
+  }
+  .compact-dashboard .peek-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+    min-height: 64px;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    padding: 6px 0;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .compact-dashboard .peek-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 36px;
+    border-radius: 10px;
+    color: var(--peek-color);
+    background: var(--accent-soft);
+  }
+  .compact-dashboard .peek-icon .icon {
+    width: 21px;
+    height: 21px;
+  }
+  .compact-dashboard .peek-copy {
+    min-width: 0;
+    flex: 1;
+  }
+  .compact-dashboard .peek-copy strong {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .compact-dashboard .peek-copy > span {
+    display: block;
+    font-size: 12px;
+    line-height: 1.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--muted);
+  }
+  .compact-dashboard .peek-main > .icon {
+    width: 17px;
+    height: 17px;
+    flex: none;
+    color: var(--muted);
+  }
+  .compact-dashboard .selection-peek > .icon-btn {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    flex: none;
+  }
+  .compact-dashboard .workspace.has-selection[data-view='map'] .insight-panel.sheet-expanded {
+    height: 100%;
+    max-height: 100%;
+    border-radius: 14px;
+    overflow: auto;
+    z-index: 14;
+    box-shadow: 0 -6px 30px #143e2720;
+  }
+  .compact-dashboard .insight-panel.sheet-expanded .selection-peek {
+    display: none;
+  }
+  .compact-dashboard .insight-panel.sheet-expanded .detail-header {
+    min-height: 66px;
+    padding: 9px 12px;
+  }
+  .compact-dashboard .detail-header > div {
+    min-width: 0;
+  }
+  .compact-dashboard .detail-header h2 {
+    font-size: 17px;
+  }
+  .compact-dashboard .detail-body {
+    padding: 14px;
+  }
+  .compact-dashboard .detail-hero .big {
+    font-size: 32px;
+  }
+  .compact-dashboard .detail-body .button {
+    min-height: 46px;
+  }
+  .compact-dashboard .playback {
+    grid-row: 4;
+    min-height: 60px;
+    padding: 7px 8px;
+    gap: 4px 6px;
+  }
+  .compact-dashboard .playback-main {
+    gap: 5px;
+  }
+  .compact-dashboard .playback-time b {
+    font-size: 20px;
+  }
+  .compact-dashboard .round-button {
+    width: 44px;
+    height: 44px;
+  }
+  .compact-dashboard .speed-control .segmented button {
+    min-width: 40px;
+    padding: 6px;
+  }
+  .compact-dashboard .timeline-control {
+    margin-top: 4px;
+  }
+  .compact-dashboard .time-ticks span:nth-child(even) {
+    display: none;
+  }
+  .compact-dashboard .map-tools,
+  .compact-dashboard .cinema-campus .map-tools,
+  .compact-dashboard .workspace.has-selection .map-tools {
+    bottom: 32px;
+    right: 7px;
+    gap: 4px;
+  }
+  .compact-dashboard .scene-caption,
+  .compact-dashboard .map-caption {
+    left: 8px;
+    bottom: 6px;
+  }
+  .compact-dashboard .scene-point:not(.selected) .scene-label,
+  .compact-dashboard .scene-truck:not(.selected) .scene-label {
+    display: none;
+  }
+  .compact-dashboard .scene-truck:not(.selected) .vehicle-shell {
+    width: 26px;
+    height: 24px;
+  }
+  .compact-dashboard .scene-truck.selected .vehicle-shell {
+    width: 34px;
+    height: 30px;
+  }
+  .compact-dashboard .amap-truck:not(.selected) .amap-truck-label {
+    display: none;
+  }
+  .compact-dashboard .scene-truck.selected,
+  .compact-dashboard .scene-point.selected {
+    z-index: 8;
+  }
+  .compact-dashboard .map-legend {
+    font-size: 12px;
+    padding: 3px 6px;
+  }
+  .dashboard-page.compact-dashboard .dashboard-main.scene-only {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .compact-dashboard .scene-only .workspace {
+    grid-row: 1;
+  }
+  .compact-dashboard .scene-only .playback {
+    grid-row: 2;
+  }
+  .compact-dashboard .scene-only .workspace.has-selection .map-panel {
+    bottom: 0;
+  }
+  .compact-dashboard .scene-only .workspace .insight-panel {
+    display: none !important;
+  }
+  .dashboard-page.compact-dashboard.tour-active .dashboard-main {
+    grid-template-rows: minmax(0, 1fr);
+    padding: 8px 10px;
+  }
+  .compact-dashboard.tour-active .workspace {
+    grid-row: 1;
+  }
+  .compact-dashboard.tour-active .workspace.has-selection .map-panel {
+    bottom: 0;
+  }
+  .compact-dashboard.tour-active .map-quick-actions {
+    display: none;
+  }
+  .compact-dashboard.tour-active .tour-panel {
+    max-height: 42vh;
+    max-height: 42dvh;
+  }
+}
+@media (max-width: 359px) {
+  .compact-dashboard .metrics > div {
+    padding: 7px 5px;
+  }
+  .compact-dashboard .metrics b {
+    font-size: 20px;
+  }
+  .compact-dashboard .basemap-switch button {
+    padding: 6px 3px;
+  }
+  .compact-dashboard .map-quick-actions {
+    gap: 1px;
+  }
+  .compact-dashboard .peek-copy strong {
+    font-size: 14px;
+  }
+  .compact-dashboard .peek-icon {
+    width: 28px;
+  }
+  .compact-dashboard .speed-control .segmented button {
+    min-width: 36px;
+  }
+}
+@media (max-height: 700px) and (max-width: 767px) {
+  .compact-dashboard .map-tools,
+  .compact-dashboard .cinema-campus .map-tools,
+  .compact-dashboard .workspace.has-selection .map-tools {
+    flex-direction: row;
+    bottom: 28px;
+  }
+  .compact-dashboard .map-tools .icon-btn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+  .compact-dashboard .metrics b {
+    font-size: 20px;
+  }
+}
+@media (min-width: 568px) and (max-height: 500px) and (orientation: landscape) and (max-width: 1023px) {
+  .dashboard-page.compact-dashboard {
+    --mobile-header: calc(44px + env(safe-area-inset-top));
+    --selection-peek-height: 66px;
+  }
+  .dashboard-page.compact-dashboard .dashboard-main,
+  .dashboard-page.compact-dashboard .dashboard-main:has(.has-selection) {
+    grid-template-columns: 200px minmax(0, 1fr);
+    grid-template-rows: 90px 46px minmax(76px, 1fr);
+    gap: 6px 10px;
+    min-height: 0;
+  }
+  .compact-dashboard .metrics {
+    grid-column: 1;
+    grid-row: 1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .compact-dashboard .metrics > div {
+    padding: 4px 8px;
+  }
+  .compact-dashboard .metrics b {
+    font-size: 18px;
+  }
+  .compact-dashboard .workspace-tabs {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .compact-dashboard .workspace {
+    grid-column: 2;
+    grid-row: 1/4;
+  }
+  .compact-dashboard .playback {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: end;
+  }
+  .compact-dashboard .playback.expanded {
+    position: absolute;
+    inset: auto 10px 6px;
+    width: auto;
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .compact-dashboard .workspace.has-selection[data-view='map'] .insight-panel.sheet-expanded {
+    max-height: 100%;
+  }
+  .compact-dashboard .scene-only .workspace {
+    grid-column: 2;
+    grid-row: 1/4;
+  }
+  .compact-dashboard .scene-only .playback {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .dashboard-page.compact-dashboard .dashboard-main.scene-only {
+    grid-template-rows: 90px 46px minmax(76px, 1fr);
+  }
+  .dashboard-page.compact-dashboard.tour-active .dashboard-main {
+    display: block;
+  }
+  .compact-dashboard.tour-active .workspace {
+    position: absolute;
+    inset: 0;
+  }
+  .compact-dashboard.tour-active .map-quick-actions {
+    display: none;
+  }
+  .compact-dashboard .map-topline {
+    padding: 3px 6px;
+  }
+  .compact-dashboard .basemap-switch {
+    max-width: 230px;
+  }
+}
+
+@media (max-width: 767px) and (min-height: 501px) {
+  .dashboard-page.compact-dashboard.details-open .dashboard-main,
+  .dashboard-page.compact-dashboard.details-open .dashboard-main:has(.has-selection) {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .dashboard-page.compact-dashboard.details-open .metrics,
+  .dashboard-page.compact-dashboard.details-open .workspace-tabs {
+    display: none;
+  }
+  .compact-dashboard.details-open .workspace {
+    grid-row: 1;
+  }
+  .compact-dashboard.details-open .playback {
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 767px) and (min-height: 501px) and (max-height: 700px) {
+  .dashboard-page.compact-dashboard.has-object .dashboard-main {
+    grid-template-rows: 46px minmax(0, 1fr) auto;
+  }
+  .dashboard-page.compact-dashboard.has-object .metrics {
+    display: none;
+  }
+  .compact-dashboard.has-object .workspace-tabs {
+    grid-row: 1;
+  }
+  .compact-dashboard.has-object .workspace {
+    grid-row: 2;
+  }
+  .compact-dashboard.has-object .playback {
+    grid-row: 3;
+  }
+  .dashboard-page.compact-dashboard.details-open.has-object .dashboard-main {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .compact-dashboard.details-open.has-object .workspace {
+    grid-row: 1;
+  }
+  .compact-dashboard.details-open.has-object .playback {
+    grid-row: 2;
+  }
+  .dashboard-page.compact-dashboard.tour-active .dashboard-main {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .compact-dashboard.tour-active .workspace {
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 767px), (min-width: 568px) and (max-height: 500px) and (max-width: 1023px) {
+  .compact-dashboard .workspace-tabs {
+    padding: 0;
+  }
+}
+
+@media (min-width: 568px) and (max-height: 500px) and (orientation: landscape) and (max-width: 1023px) {
+  .compact-dashboard .selection-peek {
+    padding: 2px 6px;
+  }
+  .compact-dashboard .peek-main {
+    min-height: 58px;
+    padding: 3px 0;
+  }
+}
+
+@media (max-width: 767px) and (min-height: 501px) {
+  .dashboard-page.compact-dashboard .dashboard-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .compact-dashboard .metrics,
+  .compact-dashboard .workspace-tabs,
+  .compact-dashboard .workspace,
+  .compact-dashboard .playback {
+    grid-column: 1;
+  }
+}
+@media (max-width: 767px) {
+  .dashboard-page.compact-dashboard.keyboard-open .dashboard-main {
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dashboard-page.compact-dashboard.keyboard-open .metrics,
+  .dashboard-page.compact-dashboard.keyboard-open .workspace-tabs,
+  .dashboard-page.compact-dashboard.keyboard-open .playback {
+    display: none;
+  }
+  .compact-dashboard.keyboard-open .workspace {
+    grid-row: 1;
+  }
+  .compact-dashboard.keyboard-open .object-panel .panel-title,
+  .compact-dashboard.keyboard-open #object-tabs {
+    display: none;
+  }
+}
+
+@media (max-width: 767px), (min-width: 568px) and (max-height: 500px) and (max-width: 1023px) {
+  .compact-dashboard .playback .mobile-only {
+    display: inline-grid;
+  }
+}
+@media (min-width: 568px) and (max-height: 500px) and (orientation: landscape) and (max-width: 1023px) {
+  .dashboard-page.compact-dashboard .dashboard-main.scene-only {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .compact-dashboard .scene-only .workspace {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .compact-dashboard .scene-only .playback {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .compact-dashboard .scene-only .playback-main {
+    flex-basis: auto;
+  }
+  .compact-dashboard .scene-only .speed-control {
+    width: 150px;
+  }
+  .compact-dashboard .scene-only .speed-control .segmented,
+  .compact-dashboard .scene-only .speed-control .segmented button {
+    height: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 767px), (min-width: 568px) and (max-height: 500px) and (max-width: 1023px) {
+  .compact-dashboard.tour-active .workspace .insight-panel {
+    display: none !important;
+  }
+}

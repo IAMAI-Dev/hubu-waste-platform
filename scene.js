@@ -254,10 +254,10 @@
             ...target,
             x: pos[0],
             y: pos[1],
-            zoom: 1.38,
+            zoom: width < 768 ? 1.55 : 1.38,
             tilt: 24,
-            anchorX: width < 768 ? 0.5 : 0.52,
-            anchorY: width < 768 ? 0.36 : 0.46,
+            anchorX: width < 350 ? 0.35 : width < 768 ? 0.5 : 0.52,
+            anchorY: width < 768 ? 0.5 : 0.46,
           };
         }
       }
@@ -286,7 +286,7 @@
             zoom: 1.55,
             tilt: 34,
             anchorX: 0.5,
-            anchorY: width < 768 ? 0.36 : 0.52,
+            anchorY: 0.52,
           };
         }
       }

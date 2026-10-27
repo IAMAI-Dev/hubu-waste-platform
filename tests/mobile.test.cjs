@@ -49,7 +49,7 @@ async function unobstructed(p, selector) {
     const p = await ctx.newPage();
     p.on('pageerror', (e) => {
       errors.push(e.message);
-      console.log('PAGEERROR', e.message);
+      console.log('PAGEERROR', p.url(), e.stack);
     });
     await p.goto(base);
     if (!process.env.MOBILE_FLOW_ONLY)
@@ -127,12 +127,12 @@ async function unobstructed(p, selector) {
     await p.locator('[data-view=points]').tap();
     await p.locator('#object-list [data-object=P4]').tap();
     const collapsed = await p.locator('.insight-panel').boundingBox();
-    await unobstructed(p, '[data-sheet-toggle]');
-    await p.locator('[data-sheet-toggle]').tap();
+    await unobstructed(p, '[data-sheet-toggle]:visible');
+    await p.locator('[data-sheet-toggle]:visible').tap();
     const expanded = await p.locator('.insight-panel').boundingBox();
     assert(expanded.height > collapsed.height + 30);
     await p.screenshot({ path: out + '/detail-expanded.png' });
-    await p.locator('[data-close-detail]').tap();
+    await p.locator('[data-close-detail]:visible').tap();
     await p.locator('#timeline-toggle').tap();
     await unobstructed(p, '#time-slider');
     await p.locator('#time-slider').fill('750');
@@ -145,10 +145,10 @@ async function unobstructed(p, selector) {
     await p.locator('[data-view=records]').tap();
     await p.locator('#record-rows [data-object]').first().tap();
     assert(await p.locator('.workspace').evaluate((e) => e.dataset.view === 'map'));
-    await p.locator('[data-close-detail]').tap();
+    await p.locator('[data-close-detail]:visible').tap();
     pass('point sheet, timeline, speed, charts and record navigation');
     await p.locator('#follow-button').tap();
-    await p.locator('[data-close-detail]').tap();
+    await p.locator('[data-close-detail]:visible').tap();
     assert(await p.evaluate(() => !!HUBU.getSnapshot().playback.follow));
     const cdp = await ctx.newCDPSession(p);
     const r = await p.locator('#dashboard-map').boundingBox();
@@ -247,7 +247,7 @@ async function unobstructed(p, selector) {
     await p.goto(base + 'detail.html');
     await p.locator('[data-view=points]').tap();
     await p.locator('#object-list [data-object=P4]').tap();
-    assert(await p.locator('[data-sheet-toggle]').isVisible());
+    assert(await p.locator('[data-sheet-toggle]:visible').isVisible());
     pass('reduced-motion retains story and full controls');
     await p.emulateMedia({ reducedMotion: 'no-preference' });
     await p.evaluate(() => HUBU.applyTheme('light'));
@@ -256,8 +256,8 @@ async function unobstructed(p, selector) {
     await p.locator('#dashboard-map.has-real-map').waitFor({ timeout: 25000 });
     assert.equal(await p.locator('.amap-point').count(), 6);
     assert.equal(await p.locator('.amap-truck').count(), 3);
-    if (await p.locator('[data-close-detail]').isVisible())
-      await p.locator('[data-close-detail]').tap();
+    if (await p.locator('[data-close-detail]:visible').isVisible())
+      await p.locator('[data-close-detail]:visible').tap();
     await p.waitForTimeout(1000);
     await p.screenshot({ path: out + '/amap-phone.png' });
     await p.setViewportSize({ width: 844, height: 390 });

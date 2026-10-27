@@ -330,12 +330,21 @@
         var g = svg.querySelector('[data-point="' + p.id + '"]');
         g.style.setProperty('--point', p.status.color);
         g.classList.toggle('overflow', p.status.key === 'full');
-        g.classList.toggle('quiet', !!selected && selected.id !== p.id && p.status.key !== 'full');
+        g.classList.toggle(
+          'quiet',
+          !!selected && selected.id !== p.id && p.status.key !== 'full',
+        );
         if (points[p.id]) {
           points[p.id].dom.style.setProperty('--point', p.status.color);
           points[p.id].dom.classList.toggle('overflow', p.status.key === 'full');
           points[p.id].dom.classList.toggle('selected', !!selected && selected.id === p.id);
-          points[p.id].dom.classList.toggle('quiet', real && real.getZoom() < 17 && (!selected || selected.id !== p.id) && p.status.key !== 'full');
+          points[p.id].dom.classList.toggle(
+            'quiet',
+            real &&
+              real.getZoom() < 17 &&
+              (!selected || selected.id !== p.id) &&
+              p.status.key !== 'full',
+          );
         }
       });
       s.trucks.forEach(function (t, i) {
@@ -352,6 +361,7 @@
         var trace = H.sliceTo(model.path, model.cum, model.total, t.frac);
         svg.querySelector('[data-trace="' + t.id + '"]').setAttribute('points', pts(trace));
         if (trucks[t.id]) {
+          trucks[t.id].dom.classList.toggle('selected', !!selected && selected.id === t.id);
           trucks[t.id].marker.setPosition([t.pos.lng, t.pos.lat]);
           trucks[t.id].body.style.transform = 'rotate(' + angle + 'deg)';
           trucks[t.id].trace.setPath(trace);
@@ -410,6 +420,7 @@
           center: H.CAMPUS_CENTER,
           zoom: 16,
           viewMode: '2D',
+          resizeEnable: true,
           animateEnable: !U.reduced(),
           features: ['bg', 'road', 'building', 'point'],
           mapStyle:
@@ -500,7 +511,12 @@
             zIndex: 150,
             map: real,
           });
-          trucks[t.id] = { marker: mk, body: dom.querySelector('.amap-truck-body'), trace: trace };
+          trucks[t.id] = {
+            marker: mk,
+            dom: dom,
+            body: dom.querySelector('.amap-truck-body'),
+            trace: trace,
+          };
         });
       } catch (e) {
         fail(e);
