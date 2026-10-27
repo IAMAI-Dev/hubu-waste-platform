@@ -1,0 +1,37 @@
+{
+  "results": [
+    {
+      "name": "touch chapter navigation and browser back retain the scrolling story",
+      "passed": true
+    },
+    {
+      "name": "point sheet, timeline, speed, charts and record navigation",
+      "passed": true
+    },
+    {
+      "name": "touch drag exits follow and two-finger pinch changes map camera",
+      "passed": true
+    },
+    {
+      "name": "focused map and mobile tour controls",
+      "passed": true
+    },
+    {
+      "name": "monitor disclosure, hour picker, tabs and six-act story restore",
+      "passed": true
+    },
+    {
+      "name": "keyboard viewport reduction and touch feedback submission",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion retains story and full controls",
+      "passed": true
+    },
+    {
+      "name": "online AMap renders six points and three vehicles on phone and landscape",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

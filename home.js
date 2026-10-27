@@ -13,10 +13,20 @@
     progress = 0,
     chapter = -1,
     visible = true;
-  const scene = HUBU_SCENE.create($('home-campus'), {
+  const homeCampus = $('home-campus'),
+    displayOnly = matchMedia('(max-width:1023px), (pointer:coarse)');
+  function syncHomeInteraction() {
+    // The story owns the camera; touch gestures belong to the document, not the model.
+    homeCampus.inert = displayOnly.matches;
+    homeCampus.classList.toggle('story-display-only', displayOnly.matches);
+  }
+  syncHomeInteraction();
+  displayOnly.addEventListener('change', syncHomeInteraction);
+  const scene = HUBU_SCENE.create(homeCampus, {
     hero: true,
     source: () => snapshot,
     onSelect: (kind, id) => {
+      if (displayOnly.matches) return;
       H.saveTime();
       location.href = 'detail.html?' + kind + '=' + id;
     },
@@ -197,6 +207,7 @@
   );
   addEventListener('qy-theme-change', () => scroll.refresh());
   addEventListener('pagehide', () => {
+    displayOnly.removeEventListener('change', syncHomeInteraction);
     demo.dispose();
     scene.destroy();
     scroll.dispose();

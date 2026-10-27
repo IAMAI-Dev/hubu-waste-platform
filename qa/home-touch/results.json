@@ -1,0 +1,71 @@
+{
+  "results": [
+    {
+      "name": "native two-way scroll and harmless marker taps 320x568",
+      "passed": true,
+      "scrolled": 145,
+      "taps": 9
+    },
+    {
+      "name": "native two-way scroll and harmless marker taps 390x640",
+      "passed": true,
+      "scrolled": 145,
+      "taps": 9
+    },
+    {
+      "name": "native two-way scroll and harmless marker taps 390x760",
+      "passed": true,
+      "scrolled": 145,
+      "taps": 9
+    },
+    {
+      "name": "native two-way scroll and harmless marker taps 390x844",
+      "passed": true,
+      "scrolled": 145,
+      "taps": 9
+    },
+    {
+      "name": "native two-way scroll and harmless marker taps 768x1024",
+      "passed": true,
+      "scrolled": 145,
+      "taps": 9
+    },
+    {
+      "name": "native two-way scroll and harmless marker taps 844x390",
+      "passed": true,
+      "scrolled": 145,
+      "taps": 6
+    },
+    {
+      "name": "native two-way scroll and harmless marker taps 1024x768",
+      "passed": true,
+      "scrolled": 145,
+      "taps": 9
+    },
+    {
+      "name": "story chapter controls still animate the campus",
+      "passed": true
+    },
+    {
+      "name": "explicit hero button enters dashboard",
+      "passed": true
+    },
+    {
+      "name": "bottom navigation enters dashboard",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion home retains native scrolling",
+      "passed": true
+    },
+    {
+      "name": "desktop model marker still opens matching vehicle",
+      "passed": true
+    },
+    {
+      "name": "resizing restores desktop model interaction",
+      "passed": true
+    }
+  ],
+  "errors": []
+}
