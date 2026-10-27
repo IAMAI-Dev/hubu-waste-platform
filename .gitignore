@@ -1,5 +1,4 @@
-# Local map credentials are browser-side configuration; do not version them.
-map-config.js
+# The public demonstration intentionally versions map-config.js.
 .env
 .env.*
 !.env.example
