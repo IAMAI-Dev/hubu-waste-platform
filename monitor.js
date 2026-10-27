@@ -5,6 +5,12 @@
     $ = (id) => document.getElementById(id),
     colors = ['#4589aa', '#458868', '#bd6963', '#8d978d'];
   U.init('monitor');
+  const disclosure = $('campus-map-disclosure'),
+    phone = matchMedia('(max-width:767px)');
+  disclosure.open = !phone.matches;
+  phone.addEventListener('change', () => {
+    disclosure.open = !phone.matches;
+  });
   let tab = '投放监测',
     key = '',
     story = null,
@@ -35,6 +41,7 @@
     render(true);
   }
   function render(force = false) {
+    if (!force && document.activeElement?.matches('[data-hour-select]')) return;
     const s = H.getSnapshot(),
       m = s.monitoring.find((p) => p.id === $('point').value),
       all = s.monitoring;
@@ -109,7 +116,7 @@
         b.name,
         m.deposits.filter((e) => e.category === b.name).reduce((a, e) => a + e.liters, 0),
       ]);
-    return `<div class="monitor-columns"><section class="monitor-panel" id="deposit-trend"><div class="eyebrow">VOLUME / 投放体积</div><h2>高峰发生在什么时候</h2><div class="monitor-trend" role="group" aria-label="每小时投放体积，点击回放到该小时末">${hours.map((v, i) => `<button data-hour="${i}" data-focus="hour-${i}" style="height:${Math.max(2, (v / max) * 100)}%" aria-label="${i + 6}时，${v.toFixed(1)}升" title="${i + 6}:00 · ${v.toFixed(1)} L"><span>${i + 6}</span></button>`).join('')}</div><p class="trend-foot">时刻 / h · 体积 / L · 点击柱形查看截至该小时的记录</p><h3>分类投放构成</h3>${categories.map(([name, v]) => `<div class="category-row"><span>${name}</span><b>${v.toFixed(1)} L</b></div>`).join('')}<p class="monitor-note">投放批次不等于人数或件数；体积用于容量计算，收运重量单独统计。超过配置容量的存量包含桶外积压。</p></section><section class="monitor-panel"><div class="eyebrow">PRESSURE / 点位负荷</div><h2>优先关注哪些位置</h2><div class="monitor-rank">${s.monitoring
+    return `<div class="monitor-columns"><section class="monitor-panel" id="deposit-trend"><div class="eyebrow">VOLUME / 投放体积</div><h2>高峰发生在什么时候</h2><div class="monitor-trend" role="group" aria-label="每小时投放体积，点击回放到该小时末">${hours.map((v, i) => `<button data-hour="${i}" data-focus="hour-${i}" style="height:${Math.max(2, (v / max) * 100)}%" aria-label="${i + 6}时，${v.toFixed(1)}升" title="${i + 6}:00 · ${v.toFixed(1)} L"><span>${i + 6}</span></button>`).join('')}</div><p class="trend-foot">时刻 / h · 体积 / L · 点击柱形查看截至该小时的记录</p><label class="hour-jump">按小时回放<select aria-label="按小时回放" data-hour-select>${hours.map((v, i) => `<option value="${i}" ${Math.floor((s.time - 360) / 60) === i ? 'selected' : ''}>${i + 6}:00 — ${i + 7}:00 · ${v.toFixed(1)} L</option>`).join('')}</select></label><h3>分类投放构成</h3>${categories.map(([name, v]) => `<div class="category-row"><span>${name}</span><b>${v.toFixed(1)} L</b></div>`).join('')}<p class="monitor-note">投放批次不等于人数或件数；体积用于容量计算，收运重量单独统计。超过配置容量的存量包含桶外积压。</p></section><section class="monitor-panel"><div class="eyebrow">PRESSURE / 点位负荷</div><h2>优先关注哪些位置</h2><div class="monitor-rank">${s.monitoring
       .slice()
       .sort(
         (a, b) =>
@@ -217,6 +224,18 @@
     tab = story.act === 5 ? '治理建议' : story.act >= 2 ? '暂存与环境' : '投放监测';
     render(true);
     drawStory();
+    if (phone.matches) {
+      if (story.act === 2 || story.act === 3) disclosure.open = true;
+      const target =
+        story.act < 2
+          ? document.querySelector('.observation-panel')
+          : story.act < 4
+            ? document.querySelector('.campus-panel')
+            : $('monitor-content');
+      requestAnimationFrame(() =>
+        target.scrollIntoView({ block: 'start', behavior: U.reduced() ? 'instant' : 'smooth' }),
+      );
+    }
   }
   function drawStory() {
     const focus = document.activeElement?.dataset.story;
@@ -230,7 +249,9 @@
   }
   function endStory() {
     if (!story) return;
-    const old = story.point;
+    const old = story.point,
+      oldScroll = story.scroll,
+      oldMap = story.mapOpen;
     tab = story.tab;
     H.endTour();
     story = null;
@@ -241,11 +262,24 @@
     document.querySelector('.monitor-controls').inert = false;
     document.querySelector('.monitor-controls').removeAttribute('aria-disabled');
     render(true);
+    if (phone.matches) {
+      disclosure.open = oldMap;
+      scrollTo({ top: oldScroll, behavior: 'instant' });
+    }
   }
   $('story-start').onclick = () => {
     const point = $('point').value;
     H.beginTour();
-    story = { point, tab, m: H.tourMilestones(660), act: 0, auto: false, elapsed: 0 };
+    story = {
+      point,
+      tab,
+      scroll: scrollY,
+      mapOpen: disclosure.open,
+      m: H.tourMilestones(660),
+      act: 0,
+      auto: false,
+      elapsed: 0,
+    };
     $('point').value = 'P4';
     $('story-start').hidden = true;
     $('story-body').hidden = false;
@@ -254,12 +288,18 @@
     storyStage(0);
     document.querySelector('.monitor-story').classList.add('is-active');
     document
-      .querySelector('.monitor-overview')
+      .querySelector('.observation-panel')
       .scrollIntoView({ behavior: U.reduced() ? 'instant' : 'smooth', block: 'start' });
   };
   document.addEventListener('click', (e) => {
     const choice = e.target.closest('[data-point-choice]');
-    if (choice && !story) select(choice.dataset.pointChoice);
+    if (choice && !story) {
+      select(choice.dataset.pointChoice);
+      if (phone.matches)
+        document
+          .querySelector('.observation-panel')
+          .scrollIntoView({ block: 'start', behavior: U.reduced() ? 'instant' : 'smooth' });
+    }
     const b = e.target.closest('[data-tab]');
     if (b) {
       tab = b.dataset.tab;
@@ -292,6 +332,14 @@
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') endStory();
+  });
+  document.addEventListener('change', (e) => {
+    if (e.target.matches('[data-hour-select]') && !story) {
+      H.setPlayback({ playing: false });
+      H.stepTo(Math.min(1200, 420 + Number(e.target.value) * 60 - 1));
+      H.saveTime();
+      render(true);
+    }
   });
   $('point').onchange = () => select($('point').value);
   $('play').onclick = () => {
@@ -333,7 +381,12 @@
           }
         }
       }
-      scene.paint(ts);
+      if (
+        $('monitor-campus').clientHeight > 0 &&
+        $('monitor-campus').getBoundingClientRect().bottom > 0 &&
+        $('monitor-campus').getBoundingClientRect().top < innerHeight
+      )
+        scene.paint(ts);
     },
     () => render(),
   );

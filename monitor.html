@@ -15,8 +15,9 @@
     <link rel="stylesheet" href="style.css?v=a3d6854d25b3" />
     <link rel="stylesheet" href="motion.css?v=84c8438233ba" />
     <link rel="stylesheet" href="monitor.css?v=efe26f78b4e2" />
+    <link rel="stylesheet" href="mobile.css?v=588874c6c4be" />
   </head>
-  <body>
+  <body class="monitor-page">
     <header id="site-header" class="site-header"></header>
     <main class="monitor-main">
       <div class="eyebrow">全过程管理 / 投放 · 暂存 · 转运</div>
@@ -38,7 +39,10 @@
         <section class="monitor-panel campus-panel">
           <div class="eyebrow">CAMPUS / 点位联动</div>
           <h2>六个点位，一条管理链。</h2>
-          <div id="monitor-campus"></div>
+          <details id="campus-map-disclosure" open>
+            <summary>校园点位分布<span data-icon="chevron"></span></summary>
+            <div id="monitor-campus"></div>
+          </details>
         </section>
         <section class="monitor-panel observation-panel">
           <div class="eyebrow">OBSERVATION / 监测场景</div>
@@ -67,10 +71,10 @@
     <script src="routes.js?v=01b4f05b4144"></script>
     <script src="seed-data.js?v=0e74605f0618"></script>
     <script src="core.js?v=992e7417871e"></script>
-    <script src="ui.js?v=def1d3fc74d8"></script>
+    <script src="ui.js?v=3d3d2772fa3c"></script>
     <script src="motion.js?v=1728aacd6a36"></script>
     <script src="campus-model.js?v=f81291b19b6f"></script>
-    <script src="scene.js?v=e71ef8ccc8b4"></script>
-    <script src="monitor.js?v=0992afc46dc0"></script>
+    <script src="scene.js?v=f74e0130232e"></script>
+    <script src="monitor.js?v=c0a03d6ddb66"></script>
   </body>
 </html>

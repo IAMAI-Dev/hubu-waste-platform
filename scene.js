@@ -22,6 +22,8 @@
       lastSnapshot = null,
       preview = null,
       entrance = options.hero ? 1 : 0;
+    const touchPoints = new Map();
+    let pinch = null;
     let camera = {
         x: 0,
         y: 0,
@@ -162,6 +164,15 @@
       'pointerdown',
       (e) => {
         if (options.hero || e.target.closest('button')) return;
+        touchPoints.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (touchPoints.size === 2) {
+          const [a, b] = [...touchPoints.values()];
+          pinch = { distance: Math.hypot(a.x - b.x, a.y - b.y), zoom: camera.zoom };
+          drag = null;
+          dragged = true;
+          el.setPointerCapture(e.pointerId);
+          return;
+        }
         drag = { x: e.clientX, y: e.clientY, c: { ...camera } };
         dragged = false;
         el.setPointerCapture(e.pointerId);
@@ -171,6 +182,20 @@
     el.addEventListener(
       'pointermove',
       (e) => {
+        if (touchPoints.has(e.pointerId))
+          touchPoints.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (pinch && touchPoints.size === 2) {
+          const [a, b] = [...touchPoints.values()];
+          target.zoom = M.clamp(
+            (pinch.zoom * Math.hypot(a.x - b.x, a.y - b.y)) / Math.max(1, pinch.distance),
+            0.6,
+            2.8,
+          );
+          camera.zoom = target.zoom;
+          follow = null;
+          if (options.onDrag) options.onDrag();
+          return;
+        }
         if (!drag) return;
         const dx = e.clientX - drag.x,
           dy = e.clientY - drag.y;
@@ -188,8 +213,13 @@
       },
       { signal },
     );
-    el.addEventListener('pointerup', () => (drag = null), { signal });
-    el.addEventListener('pointercancel', () => (drag = null), { signal });
+    function release(e) {
+      touchPoints.delete(e.pointerId);
+      pinch = null;
+      drag = null;
+    }
+    el.addEventListener('pointerup', release, { signal });
+    el.addEventListener('pointercancel', release, { signal });
     el.querySelectorAll('[data-scene-action]').forEach((b) =>
       b.addEventListener(
         'click',

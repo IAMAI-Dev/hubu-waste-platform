@@ -1,0 +1,117 @@
+{
+  "results": [
+    {
+      "name": "four pages 320x568 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 320x568 dark",
+      "passed": true
+    },
+    {
+      "name": "four pages 360x640 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 360x640 dark",
+      "passed": true
+    },
+    {
+      "name": "four pages 360x800 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 360x800 dark",
+      "passed": true
+    },
+    {
+      "name": "four pages 375x667 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 375x667 dark",
+      "passed": true
+    },
+    {
+      "name": "four pages 390x844 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 390x844 dark",
+      "passed": true
+    },
+    {
+      "name": "four pages 412x915 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 412x915 dark",
+      "passed": true
+    },
+    {
+      "name": "four pages 430x932 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 430x932 dark",
+      "passed": true
+    },
+    {
+      "name": "four pages 667x375 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 667x375 dark",
+      "passed": true
+    },
+    {
+      "name": "four pages 844x390 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 844x390 dark",
+      "passed": true
+    },
+    {
+      "name": "four pages 932x430 light",
+      "passed": true
+    },
+    {
+      "name": "four pages 932x430 dark",
+      "passed": true
+    },
+    {
+      "name": "touch chapter navigation and browser back retain the scrolling story",
+      "passed": true
+    },
+    {
+      "name": "point sheet, timeline, speed, charts and record navigation",
+      "passed": true
+    },
+    {
+      "name": "touch drag exits follow and two-finger pinch changes map camera",
+      "passed": true
+    },
+    {
+      "name": "focused map and mobile tour controls",
+      "passed": true
+    },
+    {
+      "name": "monitor disclosure, hour picker, tabs and six-act story restore",
+      "passed": true
+    },
+    {
+      "name": "keyboard viewport reduction and touch feedback submission",
+      "passed": true
+    },
+    {
+      "name": "reduced-motion retains story and full controls",
+      "passed": true
+    },
+    {
+      "name": "online AMap renders six points and three vehicles on phone and landscape",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

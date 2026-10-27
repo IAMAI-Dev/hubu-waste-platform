@@ -67,8 +67,33 @@
       el.classList.remove('visible');
     }, 4200);
   }
+  function watchViewport() {
+    let baseline = innerHeight,
+      landscape = matchMedia('(orientation: landscape)').matches;
+    function updateViewport() {
+      const focused = document.activeElement?.matches('input,textarea,select');
+      const nextLandscape = matchMedia('(orientation: landscape)').matches;
+      if (nextLandscape !== landscape && !focused) {
+        baseline = innerHeight;
+        landscape = nextLandscape;
+      }
+      const height = window.visualViewport?.height || innerHeight;
+      if (!focused) baseline = innerHeight;
+      document.documentElement.style.setProperty('--viewport-height', innerHeight + 'px');
+      document.body.classList.toggle('keyboard-open', !!focused && baseline - height > 140);
+    }
+    addEventListener('resize', updateViewport, { passive: true });
+    window.visualViewport?.addEventListener('resize', updateViewport, { passive: true });
+    document.addEventListener('focusin', updateViewport);
+    document.addEventListener('focusout', () => requestAnimationFrame(updateViewport));
+    updateViewport();
+  }
   function init(page) {
     var H = window.HUBU;
+    watchViewport();
+    addEventListener('pageshow', (event) => {
+      if (event.persisted && page !== 'feedback') location.reload();
+    });
     H.applyTheme(H.readTheme());
     var links = [
       ['index.html', 'home', '校园概览', 'leaf'],
@@ -166,7 +191,7 @@
   }
   function number(el, value, suffix) {
     if (!el) return;
-    var target = Number(value),
+    var target = Math.round(Number(value) * 10) / 10,
       previous = Number(el.dataset.value);
     if (el.dataset.value === String(value)) return;
     var first = el.dataset.value == null;
@@ -174,7 +199,7 @@
     suffix = suffix || '';
     if (el._numberFrame) cancelAnimationFrame(el._numberFrame);
     if (first || matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      el.textContent = target.toLocaleString('zh-CN') + suffix;
+      el.textContent = target.toLocaleString('zh-CN', { maximumFractionDigits: 1 }) + suffix;
       el._shown = target;
       return;
     }
@@ -182,9 +207,9 @@
       start = performance.now();
     function animate(ts) {
       var p = Math.min(1, (ts - start) / 360),
-        n = Math.round(from + (target - from) * (1 - Math.pow(1 - p, 3)));
+        n = Math.round((from + (target - from) * (1 - Math.pow(1 - p, 3))) * 10) / 10;
       el._shown = n;
-      el.textContent = n.toLocaleString('zh-CN') + suffix;
+      el.textContent = n.toLocaleString('zh-CN', { maximumFractionDigits: 1 }) + suffix;
       if (p < 1) el._numberFrame = requestAnimationFrame(animate);
     }
     el._numberFrame = requestAnimationFrame(animate);

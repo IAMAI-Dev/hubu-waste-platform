@@ -9,7 +9,8 @@
     lastList = '',
     lastDetail = '',
     lastChart = '',
-    selection = null;
+    selection = null,
+    sheetExpanded = false;
   U.init('dashboard');
   var M = HUBU_MOTION,
     renderer,
@@ -98,6 +99,11 @@
     }
   }
   function select(s, move) {
+    if (!s || !selection || s.id !== selection.id || s.kind !== selection.kind) {
+      sheetExpanded = false;
+      document.querySelector('.insight-panel').classList.remove('sheet-expanded');
+      document.querySelector('.insight-panel').scrollTop = 0;
+    }
     selection = s;
     H.setPlayback({ selected: s });
     map.select(s, move !== false);
@@ -188,7 +194,12 @@
       (p ? '校园投放点' : '清运车辆') +
       '</span><h2>' +
       U.esc(o.name) +
-      '</h2></div><button class="icon-btn" data-close-detail aria-label="收起详情">' +
+      '</h2></div><button class="sheet-toggle" data-sheet-toggle aria-expanded="' +
+      sheetExpanded +
+      '">' +
+      U.icon(sheetExpanded ? 'chevron' : 'chevronUp') +
+      (sheetExpanded ? '收起' : '展开') +
+      '</button><button class="icon-btn" data-close-detail aria-label="收起详情">' +
       U.icon('close') +
       '</button></div><div class="detail-body"><div class="detail-hero"><span>' +
       (p ? '最高类别占用' : '累计收运量') +
@@ -275,6 +286,11 @@
     }
     html += '</div>';
     if (html !== lastDetail) {
+      const focusAttr = $('object-detail').contains(document.activeElement)
+        ? ['data-sheet-toggle', 'data-close-detail', 'data-follow'].find((a) =>
+            document.activeElement.hasAttribute(a),
+          )
+        : null;
       var open = Array.from($('object-detail').querySelectorAll('details')).map(function (d) {
         return d.open;
       });
@@ -284,6 +300,10 @@
         .forEach(function (d, i) {
           d.open = !!open[i];
         });
+      if (focusAttr)
+        $('object-detail')
+          .querySelector('[' + focusAttr + ']')
+          ?.focus({ preventScroll: true });
       lastDetail = html;
     }
   }
@@ -400,7 +420,7 @@
     }
     lastEventTime = s.time;
     eventIsolation = s.isolated;
-    U.number($('metric-kg'), s.totalKg);
+    U.number($('metric-kg'), Math.round(s.totalKg));
     U.number($('metric-trips'), s.totalTrips);
     U.number($('metric-alerts'), s.alerts);
     U.number($('metric-orders'), s.openOrders);
@@ -466,6 +486,15 @@
     if (b.dataset.kind) setKind(b.dataset.kind);
     if (b.dataset.object) select({ kind: b.dataset.objectKind, id: b.dataset.object });
     if (b.hasAttribute('data-close-detail')) select(null, false);
+    if (b.hasAttribute('data-sheet-toggle')) {
+      sheetExpanded = !sheetExpanded;
+      document
+        .querySelector('.insight-panel')
+        .classList.toggle('sheet-expanded', sheetExpanded);
+      lastDetail = '';
+      render(H.getSnapshot());
+      $('object-detail').querySelector('[data-sheet-toggle]')?.focus({ preventScroll: true });
+    }
     if (b.dataset.follow) {
       H.setPlayback({
         follow: H.getSnapshot().playback.follow === b.dataset.follow ? null : b.dataset.follow,

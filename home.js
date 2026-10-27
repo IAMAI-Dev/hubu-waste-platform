@@ -136,7 +136,7 @@
     $('story-progress').style.transform = `scaleX(${p})`;
     if (c !== chapter) {
       chapter = c;
-      document.querySelectorAll('[data-chapter]').forEach((b) => {
+      document.querySelectorAll('.story-chapters [data-chapter]').forEach((b) => {
         b.setAttribute('aria-current', +b.dataset.chapter === c ? 'step' : 'false');
       });
       if (c) {
@@ -159,7 +159,7 @@
         event = snapshot.events.find((e) => e.pid === 'P4' && e.at === m.done);
       $('story-fact').innerHTML =
         c === 4
-          ? `<b>${event ? event.kg : 0}<small> kg</small></b><span>本次模拟收运<br>工单已办结</span>`
+          ? `<b>${event ? event.kg.toFixed(1) : 0}<small> kg</small></b><span>本次模拟收运<br>工单已办结</span>`
           : c === 3
             ? `<b>${H.fmt(time)}</b><span>2 号车 · 南线清运<br>驶向桃李园食堂</span>`
             : `<b>${Math.round(point.fill)}<small>%</small></b><span>桃李园食堂<br>${point.status.text}</span>`;
@@ -168,7 +168,7 @@
   const scroll = M.scrollScene(root, (p, v) =>
     update(M.reduced() || (innerHeight < 500 && innerWidth > innerHeight) ? 0 : p, v),
   );
-  document.querySelectorAll('[data-chapter]').forEach((b) =>
+  document.querySelectorAll('.story-chapters [data-chapter]').forEach((b) =>
     b.addEventListener('click', () => {
       const range = root.offsetHeight - innerHeight;
       scrollTo({
@@ -179,7 +179,7 @@
   );
   function summary() {
     const s = H.getSnapshot();
-    U.number($('home-kg'), s.totalKg);
+    U.number($('home-kg'), Math.round(s.totalKg));
     U.number($('home-alert'), s.alerts);
     U.number($('home-orders'), s.openOrders);
     $('summary-time').textContent = H.fmt(s.time);
